@@ -17,6 +17,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useIo } from "@/lib/connection";
 import { request } from "@/lib/fetcher";
+import { roomSchema } from "@/lib/schemas";
 
 const indexRoute = getRouteApi("/");
 
@@ -27,16 +28,6 @@ const createFormSchema = z.object({
 const joinFormSchema = z.object({
   name: z.string(),
   code: z.string(),
-});
-
-const userSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
-
-const roomSchema = z.object({
-  id: z.string(),
-  users: z.map(z.string(), userSchema),
 });
 
 const CreateRoom = () => {
@@ -199,7 +190,6 @@ export const HomeView = () => {
   );
 
   const [parent] = useAutoAnimate();
-  const naviate = useNavigate();
   const params = indexRoute.useSearch();
 
   useEffect(() => {
@@ -219,6 +209,7 @@ export const HomeView = () => {
           <div className="flex flex-col gap-3 w-full">
             <Link
               to="/"
+              search={{ mode: "create" }}
               className="bg-stone-200 transition-colors h-max hover:bg-green-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
               <span className="flex items-center">
@@ -237,6 +228,7 @@ export const HomeView = () => {
             </Link>
             <Link
               to="/"
+              search={{ mode: "join" }}
               className="bg-stone-200 transition-colors h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
               <span className="flex items-center">
