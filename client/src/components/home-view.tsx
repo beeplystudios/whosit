@@ -15,6 +15,8 @@ import {
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { useIo } from "@/lib/connection";
+import { request } from "@/lib/fetcher";
 
 const indexRoute = getRouteApi("/");
 
@@ -27,13 +29,42 @@ const joinFormSchema = z.object({
   code: z.string(),
 });
 
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+const roomSchema = z.object({
+  id: z.string(),
+  users: z.map(z.string(), userSchema),
+});
+
 const CreateRoom = () => {
   const form = useZodForm({
     schema: createFormSchema,
+    defaultValues: {
+      name: "",
+    }
   });
 
-  const onSubmit = (values: z.infer<typeof createFormSchema>) => {
-    console.log(values);
+  const io = useIo();
+  const navigate = useNavigate();
+
+  const onSubmit = async (values: z.infer<typeof createFormSchema>) => {
+    const room = await request({
+      route: "/room",
+      method: "POST",
+      schema: roomSchema,
+    });
+
+    io.emit("joinRoom", room.id, values.name);
+
+    navigate({
+      to: "/room/$id",
+      params: {
+        id: room.id,
+      },
+    });
   };
 
   return (
@@ -72,8 +103,18 @@ const JoinRoom = () => {
     schema: joinFormSchema,
   });
 
-  const onSubmit = (values: z.infer<typeof createFormSchema>) => {
-    console.log(values);
+  const io = useIo();
+  const navigate = useNavigate();
+
+  const onSubmit = (values: z.infer<typeof joinFormSchema>) => {
+    io.emit("joinRoom", values.code, values.name);
+
+    navigate({
+      to: "/room/$id",
+      params: {
+        id: values.code,
+      }
+    });
   };
 
   return (
