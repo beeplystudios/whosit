@@ -39,3 +39,12 @@ export const removeUser = (roomId: string, userId: string) => {
 
   return room;
 }
+
+export const getUsers = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  return [...room.users.values()];
+}
