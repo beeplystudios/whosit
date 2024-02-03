@@ -5,15 +5,17 @@ interface FactCardProps {
 
 const FactCard: React.FC<FactCardProps> = ({ facts, guesses }) => {
   return (
-    <div className="flex flex-col gap-2 bg-gray-300 bg-opacity-60 rounded-md">
-      <div className="">
+    <div className="flex flex-col gap-2 p-2 bg-neutral-300 rounded-md">
+      <ol className="flex-grow list-decimal list-inside">
         {facts.map((fact) => (
-          <div>{fact}</div>
+          <li key={fact}>{fact}</li>
         ))}
-      </div>
-      <div>
+      </ol>
+      <div className="flex gap-1 flex-wrap">
         {guesses.map((guess) => (
-          <div>{guess}</div>
+          <div key={guess} className="bg-amber-200 px-1 rounded-sm">
+            {guess}
+          </div>
         ))}
       </div>
     </div>
