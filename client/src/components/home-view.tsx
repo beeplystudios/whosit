@@ -35,9 +35,9 @@ export const HomeView = () => {
   ];
 
   return (
-    <main className="h-screen flex items-center">
-      <div className="flex items-center justify-center bg-white/60 rounded-3xl w-1/2 mx-auto h-max p-8 border-4 border-black shadow-rose-700 shadow-md">
-        <h1 className="text-4xl font-semibold">WhosIt!</h1>
+    <main className="h-screen flex items-center text-stone-800">
+      <div className="flex items-center justify-center bg-white/40 rounded-lg w-1/2 mx-auto h-max py-6 border-4 border-stone-800 shadow-rose-800 shadow-md">
+        <h1 className="text-6xl font-bold font-whosit">WhosIt!</h1>
       </div>
       {/* <FactCardGrid factses={factses} guesseses={guesseses} />
       <p>{data.message}</p>
