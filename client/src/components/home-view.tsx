@@ -1,5 +1,4 @@
 import { getRouteApi } from "@tanstack/react-router";
-import FactCard from "./factCard";
 import { CreateRoom } from "./create-room";
 import FactCardGrid from "./factCardGrid";
 
