@@ -23,9 +23,12 @@ export const ConnectionWrapper: React.FC<{
     ioRef.current.on("connect", () => {
       // Delay the connected status to prevent flickering
       if (Date.now() - now < MIN_LOADING_TIME) {
-        setTimeout(() => {
-          setStatus({ type: "connected" });
-        }, MIN_LOADING_TIME - (Date.now() - now));
+        setTimeout(
+          () => {
+            setStatus({ type: "connected" });
+          },
+          MIN_LOADING_TIME - (Date.now() - now)
+        );
       } else setStatus({ type: "connected" });
     });
 
@@ -38,6 +41,8 @@ export const ConnectionWrapper: React.FC<{
       ioRef.current = undefined;
     };
   }, []);
+
+  if (!ioRef.current) return <div>Loading...</div>;
 
   return (
     <ConnectionContext.Provider

@@ -11,4 +11,5 @@ export const memberListQuery = (id: string) =>
         route: `/room/${id}/users`,
         schema: z.array(userSchema),
       }),
+    refetchOnWindowFocus: false,
   });

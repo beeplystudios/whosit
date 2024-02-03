@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { Socket } from "socket.io-client";
 
 export type ConnectionStatus =
@@ -40,11 +40,10 @@ export const useIoEvent = <T>(options: {
 }) => {
   const io = useIo();
 
-  const [handler] = useState<(data: T) => void>(options.handler);
   useEffect(() => {
-    io.on(options.eventName, handler);
+    io.on(options.eventName, options.handler);
     return () => {
-      io.off(options.eventName, handler);
+      io.off(options.eventName, options.handler);
     };
-  }, [io, options.eventName, handler]);
+  }, [io, options.eventName, options.handler]);
 };

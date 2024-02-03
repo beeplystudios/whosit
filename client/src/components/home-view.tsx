@@ -1,5 +1,10 @@
+import { useIo } from "@/lib/connection";
+import { request } from "@/lib/fetcher";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
+import { roomSchema } from "@/lib/schemas";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ChevronRightIcon, PlayIcon } from "@heroicons/react/16/solid";
+import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
@@ -13,11 +18,6 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useIo } from "@/lib/connection";
-import { request } from "@/lib/fetcher";
-import { roomSchema } from "@/lib/schemas";
 
 const indexRoute = getRouteApi("/");
 
@@ -38,8 +38,8 @@ const CreateRoom = () => {
     },
   });
 
-  const io = useIo();
   const navigate = useNavigate();
+  const io = useIo();
 
   const onSubmit = async (values: z.infer<typeof createFormSchema>) => {
     const room = await request({
@@ -49,6 +49,7 @@ const CreateRoom = () => {
     });
 
     io.emit("joinRoom", room.id, values.name);
+    // setName(values.name);
 
     navigate({
       to: "/room/$id",
