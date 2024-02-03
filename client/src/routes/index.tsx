@@ -2,6 +2,7 @@ import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "./__root";
 import { request } from "../lib/fetcher";
 import { z } from "zod";
+import { HomeView } from "../components/home-view";
 
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -14,14 +15,5 @@ export const indexRoute = createRoute({
       }),
     });
   },
-  component: () => {
-    const data = indexRoute.useLoaderData();
-
-    return (
-      <div>
-        <h1>Index Route</h1>
-        <p>{data.message}</p>
-      </div>
-    );
-  },
+  component: HomeView,
 });
