@@ -4,8 +4,9 @@ import ReactDOM from "react-dom/client";
 import { rootRoute } from "./routes/__root.tsx";
 import { indexRoute } from "./routes/index.tsx";
 import "./global.css";
+import { roomRoute } from "./routes/room-route.ts";
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, roomRoute]);
 
 const router = createRouter({ routeTree });
 
