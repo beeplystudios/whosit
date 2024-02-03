@@ -1,22 +1,22 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { roomRouter } from "./routers/room-router";
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 
-const app = new Hono();
+const app = express();
+app.use(cors({ origin: "*" }));
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  },
+});
 
-app.route("/api/room", roomRouter);
-
-app.use("*", cors());
-
-app.get("/", (c) => {
-  return c.json({ message: "Hello, World!" });
+io.on("connection", (socket) => {
+  console.log(socket.id);
 });
 
 const port = 3000;
-console.log(`Server is running on port ${port}`);
+console.log(`Server is listening on port ${port}`);
 
-serve({
-  fetch: app.fetch,
-  port,
-});
+httpServer.listen(port);
