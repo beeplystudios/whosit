@@ -35,10 +35,13 @@ export const HomeView = () => {
   ];
 
   return (
-    <div className="">
-      <FactCardGrid factses={factses} guesseses={guesseses} />
+    <main className="h-screen flex items-center">
+      <div className="flex items-center justify-center bg-white/60 rounded-3xl w-1/2 mx-auto h-max p-8 border-4 border-black shadow-rose-700 shadow-md">
+        <h1 className="text-4xl font-semibold">WhosIt!</h1>
+      </div>
+      {/* <FactCardGrid factses={factses} guesseses={guesseses} />
       <p>{data.message}</p>
-      <CreateRoom />
-    </div>
+      <CreateRoom /> */}
+    </main>
   );
 };
