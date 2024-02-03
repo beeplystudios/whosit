@@ -1,6 +1,6 @@
 import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { ChevronRightIcon, PlayIcon } from "@heroicons/react/16/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
 import {
@@ -14,6 +14,9 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+
+const indexRoute = getRouteApi("/");
 
 const createFormSchema = z.object({
   name: z.string(),
@@ -155,18 +158,34 @@ export const HomeView = () => {
   );
 
   const [parent] = useAutoAnimate();
+  const naviate = useNavigate();
+  const params = indexRoute.useSearch();
+
+  useEffect(() => {
+    if (!params.mode) return setMode("unselected");
+
+    setMode(params.mode);
+  }, [params]);
 
   return (
     <main className="h-screen flex items-center">
       <div
         ref={parent}
-        className="flex flex-col items-center justify-center gap-8 bg-orange-400/60 rounded-3xl w-1/2 mx-auto h-max p-8 border-4 border-black shadow-rose-700 shadow-md"
+        className="flex flex-col items-center justify-center gap-8 bg-orange-400/70 rounded-3xl w-1/2 mx-auto h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md"
       >
-        <h1 className="text-4xl font-semibold">WhosIt!</h1>
+        <h1 className="text-6xl font-semibold font-whosit">WhosIt!</h1>
         {mode === "unselected" && (
           <div className="flex flex-col gap-3">
             <Button
-              onClick={() => setMode("create")}
+              onClick={() => {
+                setMode("create");
+                naviate({
+                  to: "/",
+                  search: {
+                    mode: "create",
+                  },
+                });
+              }}
               asChild
               className="bg-white h-max hover:bg-purple-300 cursor-default p-4"
             >
@@ -182,7 +201,15 @@ export const HomeView = () => {
               </span>
             </Button>
             <Button
-              onClick={() => setMode("join")}
+              onClick={() => {
+                setMode("join");
+                naviate({
+                  to: "/",
+                  search: {
+                    mode: "join",
+                  },
+                });
+              }}
               asChild
               className="bg-white h-max hover:bg-indigo-300 cursor-default p-4"
             >
@@ -200,13 +227,13 @@ export const HomeView = () => {
           </div>
         )}
         {mode === "create" && (
-          <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-black shadow-orange-700">
+          <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-stone-800 shadow-orange-700">
             <p className="text-lg font-medium mb-4">Create a new Game!</p>
             <CreateRoom />
           </div>
         )}
         {mode === "join" && (
-          <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-black shadow-orange-700">
+          <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-stone-800 shadow-orange-700">
             <p className="text-lg font-medium mb-4">Join a new Game!</p>
             <JoinRoom />
           </div>
