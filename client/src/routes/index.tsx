@@ -1,26 +1,19 @@
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "./__root";
-import FactCard from "../components/factCard";
+import { request } from "../lib/fetcher";
+import { z } from "zod";
+import { HomeView } from "../components/home-view";
 
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div>
-      Hi there
-      <FactCard 
-        facts={[
-          "I ate a slug as a kid, it was on purpose",
-          "I still do it sometimes, you know",
-          "nobody ever understands",
-          "I'm slug man"
-        ]}
-        guesses={[
-          "slugman",
-          "slugman",
-          "lucy"
-        ]}
-      />
-    </div>
-  ),
+  loader: async () => {
+    return await request({
+      route: "/",
+      schema: z.object({
+        message: z.string(),
+      }),
+    });
+  },
+  component: HomeView,
 });
