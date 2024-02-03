@@ -29,6 +29,18 @@ app.get("/", (req, res) => {
 app.use("/room", roomRouter);
 
 io.on("connection", (socket) => {
+  const leave = (roomId: string) => {
+    socket.leave(roomId);
+    console.log(`User with id ${socket.id} left room ${roomId}`);
+
+    try {
+      removeUser(roomId, socket.id);
+      socket.to(roomId).emit("userLeft");
+    } catch (err) {
+      // uhhh
+    }
+  };
+  
   console.log(`Client with id ${socket.id} connected`);
   socket.on("joinRoom", (roomId, userName) => {
     socket.join(roomId);
@@ -44,14 +56,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", (roomId) => {
-    socket.leave(roomId);
-    console.log(`User with id ${socket.id} left room ${roomId}`);
+    leave(roomId);
+  });
 
-    try {
-      removeUser(roomId, socket.id);
-      io.to(roomId).emit("userLeft");
-    } catch (err) {
-      // uhhh
+  socket.on("disconnecting", () => {
+    for (const roomId of socket.rooms) {
+      if (roomId != socket.id) {
+        leave(roomId);
+      }
     }
   });
 
