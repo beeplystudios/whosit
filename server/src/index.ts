@@ -1,22 +1,43 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 import { roomRouter } from "./routers/room-router";
 
-const app = new Hono();
+const app = express();
+app.use(cors({ origin: "*" }));
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  },
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000, // 2 mins
+  }
+});
 
-app.route("/api/room", roomRouter);
+app.get("/", (req, res) => {
+  res.send({ message: "Hello World" });
+});
 
-app.use("*", cors());
+app.use("/room", roomRouter);
 
-app.get("/", (c) => {
-  return c.json({ message: "Hello, World!" });
+io.on("connection", (socket) => {
+  console.log(`Client with id ${socket.id} connected`);
+  socket.on("join", (roomId) => {
+    socket.join(roomId);
+  });
+
+  socket.on("leave", (roomId) => {
+    socket.leave(roomId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Client with id ${socket.id} disconnected`);
+  });
 });
 
 const port = 3000;
-console.log(`Server is running on port ${port}`);
+console.log(`Server is listening on port ${port}`);
 
-serve({
-  fetch: app.fetch,
-  port,
-});
+httpServer.listen(port);

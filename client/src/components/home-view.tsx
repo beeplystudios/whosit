@@ -1,6 +1,5 @@
 import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { ChevronRightIcon, PlayIcon } from "@heroicons/react/16/solid";
-import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
@@ -15,8 +14,6 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-
-const indexRoute = getRouteApi("/");
 
 const createFormSchema = z.object({
   name: z.string(),
