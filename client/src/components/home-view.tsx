@@ -14,7 +14,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
 
 const indexRoute = getRouteApi("/");
 
@@ -171,59 +171,45 @@ export const HomeView = () => {
     <main className="h-screen flex items-center">
       <div
         ref={parent}
-        className="flex flex-col items-center justify-center gap-8 bg-orange-400/70 rounded-3xl w-1/2 mx-auto h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md"
+        className="flex flex-col items-center justify-center gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md"
       >
         <h1 className="text-6xl font-semibold font-whosit">WhosIt!</h1>
         {mode === "unselected" && (
-          <div className="flex flex-col gap-3">
-            <Button
-              onClick={() => {
-                setMode("create");
-                naviate({
-                  to: "/",
-                  search: {
-                    mode: "create",
-                  },
-                });
-              }}
-              asChild
-              className="bg-white h-max hover:bg-purple-300 cursor-default p-4"
+          <div className="flex flex-col gap-3 w-full">
+            <Link
+              to="/"
+              className="bg-yellow-100 h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
-              <span className="flex items-start gap-8">
+              <span className="flex items-center">
                 <span className="flex flex-col">
-                  <span className="text-lg font-medium">Create a New Game</span>
+                  <span className="text-lg font-semibold">
+                    Create a New Game
+                  </span>
                   <p className="text-sm font-medium text-neutral-700">
                     If you're hosting this round, create a new room for the
                     team!
                   </p>
                 </span>
+                <span className="flex-grow" />
                 <ChevronRightIcon className="h-6 w-6 mt-0.5 ml-8" />
               </span>
-            </Button>
-            <Button
-              onClick={() => {
-                setMode("join");
-                naviate({
-                  to: "/",
-                  search: {
-                    mode: "join",
-                  },
-                });
-              }}
-              asChild
-              className="bg-white h-max hover:bg-indigo-300 cursor-default p-4"
+            </Link>
+            <Link
+              to="/"
+              className="bg-yellow-100 h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
-              <span className="flex items-start">
+              <span className="flex items-center">
                 <span className="flex flex-col">
-                  <span className="text-lg font-medium">Join a Game</span>
+                  <span className="text-lg font-semibold">Join a Game</span>
                   <p className="text-sm font-medium text-neutral-700">
                     If you're not hosting this round, join an existing room with
                     a code!
                   </p>
                 </span>
+                <span className="flex-grow" />
                 <ChevronRightIcon className="h-6 w-6 mt-0.5 ml-8" />
               </span>
-            </Button>
+            </Link>
           </div>
         )}
         {mode === "create" && (
