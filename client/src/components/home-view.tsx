@@ -15,6 +15,8 @@ import {
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
+import { useIo } from "@/lib/connection";
+import { request } from "@/lib/fetcher";
 
 const indexRoute = getRouteApi("/");
 
@@ -27,13 +29,42 @@ const joinFormSchema = z.object({
   code: z.string(),
 });
 
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+const roomSchema = z.object({
+  id: z.string(),
+  users: z.map(z.string(), userSchema),
+});
+
 const CreateRoom = () => {
   const form = useZodForm({
     schema: createFormSchema,
+    defaultValues: {
+      name: "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof createFormSchema>) => {
-    console.log(values);
+  const io = useIo();
+  const navigate = useNavigate();
+
+  const onSubmit = async (values: z.infer<typeof createFormSchema>) => {
+    const room = await request({
+      route: "/room",
+      method: "POST",
+      schema: roomSchema,
+    });
+
+    io.emit("joinRoom", room.id, values.name);
+
+    navigate({
+      to: "/room/$id",
+      params: {
+        id: room.id,
+      },
+    });
   };
 
   return (
@@ -72,8 +103,18 @@ const JoinRoom = () => {
     schema: joinFormSchema,
   });
 
-  const onSubmit = (values: z.infer<typeof createFormSchema>) => {
-    console.log(values);
+  const io = useIo();
+  const navigate = useNavigate();
+
+  const onSubmit = (values: z.infer<typeof joinFormSchema>) => {
+    io.emit("joinRoom", values.code, values.name);
+
+    navigate({
+      to: "/room/$id",
+      params: {
+        id: values.code,
+      },
+    });
   };
 
   return (
@@ -178,7 +219,7 @@ export const HomeView = () => {
           <div className="flex flex-col gap-3 w-full">
             <Link
               to="/"
-              className="bg-yellow-100 h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
+              className="bg-stone-200 transition-colors h-max hover:bg-green-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
               <span className="flex items-center">
                 <span className="flex flex-col">
@@ -196,7 +237,7 @@ export const HomeView = () => {
             </Link>
             <Link
               to="/"
-              className="bg-yellow-100 h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
+              className="bg-stone-200 transition-colors h-max hover:bg-purple-100 cursor-default p-4 rounded-md border-2 border-stone-800"
             >
               <span className="flex items-center">
                 <span className="flex flex-col">

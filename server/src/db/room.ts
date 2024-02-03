@@ -2,17 +2,15 @@ import { User } from "./user";
 
 export type Room = {
   id: string;
-  code: string;
   users: Map<string, User>;
 };
 
 const rooms: Map<string, Room> = new Map();
 
-export const createRoom = (user: User) => {
+export const createRoom = () => {
   const code = Math.random().toString(36).substring(2, 8);
 
-  const room = { id: code, code, users: new Map() };
-  room.users.set(user.id, user)
+  const room = { id: code, users: new Map() };
   rooms.set(code, room);
 
   return room;
