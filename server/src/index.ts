@@ -33,13 +33,26 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", (roomId, userName) => {
     socket.join(roomId);
     console.log(`User with id ${socket.id} named ${userName} joined room ${roomId}`);
-    addUser(roomId, { id: socket.id, name: userName });
+
+    try {
+      const user = { id: socket.id, name: userName };
+      addUser(roomId, user);
+      io.to(roomId).except(socket.id).emit("newUser", user);
+    } catch (err) {
+      // uhhhh
+    }
   });
 
   socket.on("leaveRoom", (roomId) => {
     socket.leave(roomId);
     console.log(`User with id ${socket.id} left room ${roomId}`);
-    removeUser(roomId, socket.id);
+
+    try {
+      removeUser(roomId, socket.id);
+      io.to(roomId).emit("userLeft");
+    } catch (err) {
+      // uhhh
+    }
   });
 
   socket.on("disconnect", () => {
