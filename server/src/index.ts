@@ -1,8 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { roomRouter } from "./routers/room-router";
 
 const app = new Hono();
+
+app.route("/api/room", roomRouter);
 
 app.use("*", cors());
 

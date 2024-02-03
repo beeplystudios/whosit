@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 import FactCard from "./factCard";
+import { CreateRoom } from "./create-room";
 
 const indexRoute = getRouteApi("/");
 
@@ -8,20 +9,17 @@ export const HomeView = () => {
 
   return (
     <div className="">
-      <FactCard 
+      <FactCard
         facts={[
           "I ate a slug as a kid, it was on purpose",
           "I still do it sometimes, you know",
           "nobody ever understands",
-          "I'm slug man"
+          "I'm slug man",
         ]}
-        guesses={[
-          "slugman",
-          "slugman",
-          "lucy"
-        ]}
+        guesses={["slugman", "slugman", "lucy"]}
       />
       <p>{data.message}</p>
+      <CreateRoom />
     </div>
   );
 };
