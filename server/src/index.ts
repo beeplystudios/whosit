@@ -5,7 +5,7 @@ import cors from "cors";
 import { roomRouter } from "./routers/room-router";
 import SuperJSON from "superjson";
 import bodyParser from "body-parser";
-import { addUser, getHost, getUsers, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
+import { addUser, getHost, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
 
 const jsonParser = bodyParser.json();
 

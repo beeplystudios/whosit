@@ -11,3 +11,9 @@ export const roomRoute = createRoute({
   },
   component: RoomView,
 });
+
+export const roomPlayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/room/$id/play",
+  component: RoomPlayView,
+})
