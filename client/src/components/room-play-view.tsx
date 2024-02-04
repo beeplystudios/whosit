@@ -12,6 +12,7 @@ import { Textarea } from "./ui/textarea";
 import { userSchema } from "@/lib/schemas";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { answersListQuery } from "@/lib/queries";
+import { cn } from "@/lib/utils";
 
 const routeApi = getRouteApi("/room/$id/play");
 
@@ -60,7 +61,13 @@ export const AnsweringStateView = () => {
 
   const queryClient = useQueryClient();
 
-  useTimerLoop(10, setStateMatching);
+  useTimerLoop(10, () => {
+    if (!answered) {
+      io.emit("answer", id, "");
+    }
+
+    setStateMatching();
+  });
 
   useIoEvent({
     eventName: "setStateMatching",
@@ -163,7 +170,6 @@ const MatchingStateView = () => {
     } else {
       setGuess(idx, value);
     }
-    // io.emit("makeGuess", id, idx, value);
   };
 
   const lockIn = (value: string, idx: number) => {
@@ -173,45 +179,45 @@ const MatchingStateView = () => {
 
   return (
     <div>
-      <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3">
-        {data.map((unknownUser, idx) => (
-          <>
-            {[...unknownUser.answers].map(([questionIdx, answer]) => (
-              <div className="flex flex-col gap-1">
-                <p className="text-xl font-medium">{questions[questionIdx]}</p>
-                <p>{answer}</p>
-              </div>
-            ))}
-            <div className="flex items-center gap-4">
-              <ToggleGroup
-                type="single"
-                className="my-2"
-                value={guesses[idx]?.userId ?? undefined}
-                onValueChange={(value) => toggleUserValue(value, idx)}
-                disabled={!!guesses[idx]?.isLocked}
-              >
-                {members.users
-                  .filter((user) => user.id !== io.id)
-                  .map((user) => (
-                    <ToggleGroupItem value={user.id} key={user.id}>
-                      {user.name}
-                    </ToggleGroupItem>
-                  ))}
-              </ToggleGroup>
-              <Button
-                className="bg-white"
-                onClick={() => lockIn(guesses[idx]!.userId, idx)}
-                disabled={!guesses[idx] || guesses[idx]?.isLocked}
-              >
-                <span>
-                  <LockClosedIcon className="h-4 w-4" />
-                </span>
-                Lock In
-              </Button>
+      {data.map((unknownUser, idx) => (
+        <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3">
+          {[...unknownUser.answers].map(([questionIdx, answer]) => (
+            <div className="flex flex-col gap-1">
+              <p className="text-xl font-medium">{questions[questionIdx]}</p>
+              <p className={cn(answer === "" && "italic")}>
+                {answer === "" ? "No answer provided" : answer}
+              </p>
             </div>
-          </>
-        ))}
-      </div>
+          ))}
+          <div className="flex items-center gap-4">
+            <ToggleGroup
+              type="single"
+              className="my-2"
+              value={guesses[idx]?.userId ?? undefined}
+              onValueChange={(value) => toggleUserValue(value, idx)}
+              disabled={!!guesses[idx]?.isLocked}
+            >
+              {members.users
+                .filter((user) => user.id !== io.id)
+                .map((user) => (
+                  <ToggleGroupItem value={user.id} key={user.id}>
+                    {user.name}
+                  </ToggleGroupItem>
+                ))}
+            </ToggleGroup>
+            <Button
+              className="bg-white"
+              onClick={() => lockIn(guesses[idx]!.userId, idx)}
+              disabled={!guesses[idx] || guesses[idx]?.isLocked}
+            >
+              <span>
+                <LockClosedIcon className="h-4 w-4" />
+              </span>
+              Lock In
+            </Button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

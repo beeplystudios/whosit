@@ -108,7 +108,7 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
     <div className="flex flex-col-reverse gap-4">
       <ScrollArea className="h-48">
         {data.length === 0 && (
-          <div className="border-2 h-48 flex flex-col border-stone-800 rounded-md border-dashed items-center justify-center">
+          <div className="border-2 h-48 flex flex-col border-stone-800 rounded-md border-dashed items-center justify-center text-center p-4">
             <p className="font-medium text-lg">There are no questions!</p>
             <p className="text-sm">
               You can add questions above to start the round!
@@ -170,7 +170,10 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
                         {...field}
                         placeholder="Thoughtful and interesting question..."
                       />
-                      <Button type="submit">
+                      <Button
+                        type="submit"
+                        className="bg-pink-400 hover:bg-pink-300"
+                      >
                         <PlusIcon className="h-4 w-4 mr-2" />
                         Add
                       </Button>
