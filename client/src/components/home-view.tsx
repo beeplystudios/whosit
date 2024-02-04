@@ -45,6 +45,9 @@ const CreateRoom = () => {
       route: "/room",
       method: "POST",
       schema: roomSchema,
+      body: {
+        userId: io.id,
+      },
     });
 
     io.emit("joinRoom", room.id, values.name);

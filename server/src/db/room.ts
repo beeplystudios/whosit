@@ -2,15 +2,16 @@ import { User } from "./user";
 
 export type Room = {
   id: string;
+  hostId: string,
   users: Map<string, User>;
 };
 
 const rooms: Map<string, Room> = new Map();
 
-export const createRoom = () => {
+export const createRoom = (hostId: string) => {
   const code = Math.random().toString(36).substring(2, 8);
 
-  const room = { id: code, users: new Map() };
+  const room = { id: code, hostId, users: new Map() };
   rooms.set(code, room);
 
   return room;
@@ -47,4 +48,13 @@ export const getUsers = (roomId: string) => {
   }
 
   return [...room.users.values()];
+}
+
+export const getHost = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  return room.hostId;
 }

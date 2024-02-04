@@ -9,7 +9,10 @@ export const memberListQuery = (id: string) =>
     queryFn: async () =>
       await request({
         route: `/room/${id}/users`,
-        schema: z.array(userSchema),
+        schema: z.object({
+          hostId: z.string(),
+          users: z.array(userSchema),
+        }),
       }),
     refetchOnWindowFocus: false,
   });

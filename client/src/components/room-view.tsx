@@ -15,7 +15,7 @@ export const RoomView = () => {
 
   const newUserHandler = useCallback(
     (user: z.infer<typeof userSchema>) => {
-      queryClient.setQueryData(["room-members", id], [...data, user]);
+      queryClient.setQueryData(["room-members", id], { ...data, users: [...data.users, user] });
     },
     [queryClient, data, id]
   );
