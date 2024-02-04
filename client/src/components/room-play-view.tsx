@@ -3,8 +3,35 @@ import { Button } from "./ui/button";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { z } from "zod";
 import { Textarea } from "./ui/textarea";
+import { useGameStore } from "@/lib/game";
+import { useEffect, useState } from "react";
 
-export const RoomPlayView = () => {
+const useTimerLoop = () => {
+  const duration = 30;
+  const [startTime] = useState(new Date());
+  const [timeRemaining, setTimeRemaining] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const elapsed = now.getTime() - startTime.getTime();
+      const remaining = duration - elapsed / 1000;
+
+      if (remaining < 0) {
+        clearInterval(interval);
+        setTimeRemaining(0);
+      } else {
+        setTimeRemaining(Math.ceil(remaining));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [duration, startTime, timeRemaining]);
+
+  return timeRemaining;
+};
+
+export const AnsweringStateView = () => {
   const question = "How's it hanging?";
 
   const responseFormSchema = z.object({
@@ -57,6 +84,42 @@ export const RoomPlayView = () => {
           </Form>
         </div>
       </div>
+    </main>
+  );
+};
+const MatchingStateView = () => {
+  return <div>hdwai</div>;
+};
+
+const GameState = () => {
+  const gameState = useGameStore((s) => s.state);
+
+  if (gameState === "answering") {
+    return <AnsweringStateView />;
+  }
+
+  if (gameState === "matching") {
+    return <MatchingStateView />;
+  }
+
+  return <div></div>;
+};
+
+export const RoomPlayView = () => {
+  const timeRemaining = useTimerLoop();
+
+  return (
+    <main className="max-w-[100rem] py-6 px-4 md:mx-auto md:w-[70%]">
+      <nav className="flex justify-between items-center gap-8 w-full mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max p-6 border-4 border-stone-800 shadow-rose-700 shadow-md">
+        <p className="font-semibold text-xls">Nirjhor Nath</p>
+        <p className="text-3xl bg-pink-600 p-3 font-bold rounded-full h-12 w-12 flex items-center justify-center border-2 border-stone-800">
+          {timeRemaining}
+        </p>
+        <p className="font-mono text-lg text-emerald-950 bg-emerald-300 px-4 rounded-full border-2 border-stone-800">
+          Points: 38
+        </p>
+      </nav>
+      <GameState />
     </main>
   );
 };
