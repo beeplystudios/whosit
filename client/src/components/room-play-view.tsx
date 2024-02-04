@@ -4,8 +4,13 @@ import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { z } from "zod";
 import { Textarea } from "./ui/textarea";
 import { useGameStore } from "@/lib/game";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
+import { useIo, useIoEvent } from "@/lib/connection";
+import { getRouteApi } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+
+const routeApi = getRouteApi("/room/$id/play");
 
 const useTimerLoop = (duration: number, callback: () => void) => {
   const [startTime] = useState(new Date());
@@ -42,11 +47,15 @@ const responseFormSchema = z.object({
 });
 
 export const AnsweringStateView = () => {
-  const setStateMatching = useGameStore((s) => s.setStateMatching);
+  const [setStateMatching, round] = useGameStore((s) => [s.setStateMatching, s.round]);
 
-  useTimerLoop(60, setStateMatching);
+  const { id } = routeApi.useParams();
 
-  const question = "How's it hanging?";
+  const queryClient = useQueryClient();
+
+  useTimerLoop(10, setStateMatching);
+
+  const question = (queryClient.getQueryData(["room-questions", id]) as string[])[round];
 
   const form = useZodForm({
     schema: responseFormSchema,
@@ -55,8 +64,10 @@ export const AnsweringStateView = () => {
     },
   });
 
-  const onSubmit = () => {
-    return null;
+  const io = useIo();
+
+  const onSubmit = (values: z.infer<typeof responseFormSchema>) => {
+    io.emit("answer", id, values.response);
   };
 
   return (
@@ -101,8 +112,12 @@ export const AnsweringStateView = () => {
   );
 };
 const MatchingStateView = () => {
-  const setStateAnswering = useGameStore((s) => s.setStateAnswering);
-  useTimerLoop(60, setStateAnswering);
+  const { id } = routeApi.useParams();
+  const io = useIo();
+
+  useTimerLoop(10, () => {
+    io.emit("nextRound", id);
+  });
 
   return <div>hdwai</div>;
 };
@@ -110,21 +125,37 @@ const MatchingStateView = () => {
 const GameState = () => {
   const gameState = useGameStore((s) => s.state);
 
-  return <AnsweringStateView />;
+  // return <AnsweringStateView />;
 
-  // if (gameState === "answering") {
-  //   return <AnsweringStateView />;
-  // }
+  if (gameState === "answering") {
+    return <AnsweringStateView />;
+  }
 
-  // if (gameState === "matching") {
-  //   return <MatchingStateView />;
-  // }
+  if (gameState === "matching") {
+    return <MatchingStateView />;
+  }
 
-  // return <div></div>;
+  return <div></div>;
 };
 
 export const RoomPlayView = () => {
-  const timeLeft = useGameStore((s) => s.timeLeft);
+  const { id } = routeApi.useParams();
+  const [timeLeft, setRound, setStateFinished, setStateAnswering] = useGameStore((s) => [s.timeLeft, s.setRound, s.setStateFinished, s.setStateAnswering]);
+  const queryClient = useQueryClient();
+
+  const nextRoundHandler = useCallback((round: number) => {
+    if (round >= (queryClient.getQueryData(["room-questions", id]) as string[]).length) {
+      setStateFinished();
+    } else {
+      setRound(round);
+      setStateAnswering();
+    }
+  }, [setRound]);
+
+  useIoEvent({
+    eventName: "round",
+    handler: nextRoundHandler,
+  });
 
   return (
     <main className="max-w-[100rem] py-6 px-4 md:mx-auto md:w-[70%]">

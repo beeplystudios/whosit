@@ -5,7 +5,7 @@ import cors from "cors";
 import { roomRouter } from "./routers/room-router";
 import SuperJSON from "superjson";
 import bodyParser from "body-parser";
-import { addUser, getHost, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
+import { addUser, getHost, makeGuess, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
 
 const jsonParser = bodyParser.json();
 
@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
     const hostId = getHost(roomId);
     return hostId === socket.id;
   };
-  
+
   console.log(`Client with id ${socket.id} connected`);
   socket.on("joinRoom", (roomId, userName) => {
     socket.join(roomId);
@@ -72,8 +72,8 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("round", round);
   })
 
-  socket.on("answer", (roomId, questionIdx, answer) => {
-    setUserAnswer(roomId, socket.id, questionIdx, answer);
+  socket.on("answer", (roomId, answer) => {
+    setUserAnswer(roomId, socket.id, answer);
   });
 
   socket.on("setQuestion", (roomId, questionIdx, question) => {
@@ -91,6 +91,11 @@ io.on("connection", (socket) => {
 
     io.to(roomId).emit("questionRemoved", questionIdx);
   })
+
+  socket.on("makeGuess", (roomId, index, guessedUserId) => {
+    makeGuess(roomId, socket.id, index, guessedUserId);
+    io.to(roomId).emit("guessMade", { userId: socket.id, index, guessedUserId });
+  });
 
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {

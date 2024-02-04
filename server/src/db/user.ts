@@ -3,4 +3,5 @@ export type User = {
   name: string;
   points: number;
   answers: Map<number, string>;
+  guesses: Map<number, string>;
 };
