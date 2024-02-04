@@ -9,6 +9,7 @@ export type Room = {
   finished: boolean;
   round: number;
   order: Map<string, number>;
+  orderRev: Map<number, string>;
 };
 
 const rooms: Map<string, Room> = new Map();
@@ -16,7 +17,7 @@ const rooms: Map<string, Room> = new Map();
 export const createRoom = (hostId: string) => {
   const code = Math.random().toString(36).substring(2, 8);
 
-  const room = { id: code, hostId, questions: [], users: new Map(), started: false, finished: false, round: 0, order: new Map() };
+  const room = { id: code, hostId, questions: [], users: new Map(), started: false, finished: false, round: 0, order: new Map(), orderRev: new Map() };
   rooms.set(code, room);
 
   return room;
@@ -136,14 +137,17 @@ export const startGame = (roomId: string) => {
 
   const ids = [...room.users.keys()];
   const orderMap = new Map();
+  const orderMapRev = new Map();
   ids.map((id, idx) => ({ id, idx, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .forEach(({ id, idx }) => {
       orderMap.set(id, idx);
+      orderMapRev.set(idx, id);
     });
 
   room.started = true;
   room.order = orderMap;
+  room.orderRev = orderMapRev;
 }
 
 export const nextRound = (roomId: string) => {
@@ -174,7 +178,20 @@ export const getOrder = (roomId: string) => {
   return room.order;
 }
 
-export const makeGuess = (roomId: string, userId: string, index: number, guessedUserId: string) => {
+export const getOrderRev = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  if (!room.started) {
+    throw new Error(`Cannot get order on room ${roomId} which is not started`);
+  }
+
+  return room.orderRev;
+}
+
+export const makeGuess = (roomId: string, userId: string, index: number, guessedId: string) => {
   const room = rooms.get(roomId);
   if (!room) {
     throw new Error(`Room with id ${roomId} not found!`);
@@ -190,7 +207,44 @@ export const makeGuess = (roomId: string, userId: string, index: number, guessed
     throw new Error(`User with id ${userId} does not exist in room with id ${roomId}!`);
   }
 
-  if (!!user.guesses.get(index)) return;
+  if (user.guesses.get(index)) return;
   
-  user.guesses.set(index, guessedUserId);
+  user.guesses.set(index, { round: room.round, guessedId });
+}
+
+export const calculatePoints = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  if (!room.finished) {
+    throw new Error(`Cannot calculate points on unfinished room ${roomId}`);
+  }
+
+  room.users.forEach((user) => {
+    var points = 0;
+    for (const [idx, { round, guessedId }] of user.guesses) {
+      if (room.orderRev.get(idx) === guessedId) {
+        switch (round) {
+          case 0:
+            points += 20;
+            break;
+          case 1:
+            points += 15;
+            break;
+          default:
+            points += 10;
+        }
+      }
+    }
+
+    for (const [_, answer] of user.answers) {
+      if (answer === "") {
+        points -= 15;
+      }
+    }
+
+    user.points = points;
+  })
 }
