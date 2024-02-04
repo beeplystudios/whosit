@@ -53,10 +53,10 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
           {data.map((question, idx) => (
             <div
               key={idx}
-              className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8"
+              className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8 transition-opacity"
             >
               <p className="font-medium">{question}</p>
-              <div className="group-hover:flex hidden gap-2">
+              <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
                 <Button size="icon">
                   <ChevronUpIcon className="h-4 w-4" />
                 </Button>
