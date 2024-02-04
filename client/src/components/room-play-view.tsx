@@ -1,7 +1,7 @@
 import { useIo, useIoEvent } from "@/lib/connection";
 import { useGameStore } from "@/lib/game";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
-import { ChevronRightIcon } from "@heroicons/react/16/solid";
+import { ChevronRightIcon, LockClosedIcon } from "@heroicons/react/16/solid";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -142,7 +142,10 @@ const MatchingStateView = () => {
   });
   const queryClient = useQueryClient();
 
-  const questions = queryClient.getQueryData(["room-questions", id]) as string[];
+  const questions = queryClient.getQueryData([
+    "room-questions",
+    id,
+  ]) as string[];
 
   const members = queryClient.getQueryData(["room-members", id]) as {
     hostId: string;
@@ -154,28 +157,46 @@ const MatchingStateView = () => {
     // io.emit("makeGuess", id, idx, value);
   };
 
+  const lockIn = (value: string, idx: number) => {
+    io.emit("makeGuess", id, idx, value);
+  };
+
   return (
     <div>
       <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3">
         {data.map((unknownUser, idx) => (
           <>
-          {[...unknownUser.answers].map(([questionIdx, answer]) => (
-            <div className="flex flex-col gap-1">
-              <p className="text-xl font-medium">{questions[questionIdx]}</p>
-              <p>{answer}</p>
-            </div>))}
-            <ToggleGroup
-              type="single"
-              className="my-2"
-              value={guesses[idx]}
-              onValueChange={(value) => toggleUserValue(value, idx)}
-            >
-              {members.users.filter((user) => user.id !== io.id).map((user) => (
-                <ToggleGroupItem value={user.id} key={user.id}>
-                  {user.name}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+            {[...unknownUser.answers].map(([questionIdx, answer]) => (
+              <div className="flex flex-col gap-1">
+                <p className="text-xl font-medium">{questions[questionIdx]}</p>
+                <p>{answer}</p>
+              </div>
+            ))}
+            <div className="flex items-center gap-4">
+              <ToggleGroup
+                type="single"
+                className="my-2"
+                value={guesses[idx]}
+                onValueChange={(value) => toggleUserValue(value, idx)}
+              >
+                {members.users
+                  .filter((user) => user.id !== io.id)
+                  .map((user) => (
+                    <ToggleGroupItem value={user.id} key={user.id}>
+                      {user.name}
+                    </ToggleGroupItem>
+                  ))}
+              </ToggleGroup>
+              <Button
+                className="bg-white"
+                onClick={() => lockIn(guesses[idx], idx)}
+              >
+                <span>
+                  <LockClosedIcon className="h-4 w-4" />
+                </span>
+                Lock In
+              </Button>
+            </div>
           </>
         ))}
       </div>
