@@ -79,7 +79,7 @@ export const AnsweringStateView = () => {
 
   const queryClient = useQueryClient();
 
-  useTimerLoop(10, () => {
+  useTimerLoop(60, () => {
     if (!answered) {
       io.emit("answer", id, "");
     }
@@ -178,7 +178,7 @@ const MatchingStateView = () => {
 
   const { data } = useSuspenseQuery(answersListQuery(id, io.id!));
 
-  useTimerLoop(120, () => {
+  useTimerLoop(60, () => {
     io.emit("nextRound", id);
   });
   const queryClient = useQueryClient();
