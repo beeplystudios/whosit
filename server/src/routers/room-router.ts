@@ -1,5 +1,13 @@
 import express from "express";
-import { calculatePoints, createRoom, getHost, getOrder, getOrderRev, getQuestions, getUsers } from "../db/room";
+import {
+  calculatePoints,
+  createRoom,
+  getHost,
+  getOrder,
+  getOrderRev,
+  getQuestions,
+  getUsers,
+} from "../db/room";
 import SuperJSON from "superjson";
 
 export const roomRouter = express.Router();
@@ -15,16 +23,19 @@ roomRouter.get("/:roomId/users", (req, res) => {
 
   try {
     const users = getUsers(roomId);
-    res.send(SuperJSON.stringify({
-      hostId: getHost(roomId), users: users.map((user) => {
-        return { id: user.id, name: user.name };
+    res.send(
+      SuperJSON.stringify({
+        hostId: getHost(roomId),
+        users: users.map((user) => {
+          return { id: user.id, name: user.name };
+        }),
       })
-    }));
+    );
   } catch (err) {
     res.status(404);
     res.send(SuperJSON.stringify({ error: (err as Error).message }));
   }
-})
+});
 
 roomRouter.get("/:roomId/questions", (req, res) => {
   const { roomId } = req.params;
@@ -36,7 +47,7 @@ roomRouter.get("/:roomId/questions", (req, res) => {
     res.status(404);
     res.send(SuperJSON.stringify({ error: (err as Error).message }));
   }
-})
+});
 
 roomRouter.get("/:roomId/responses", (req, res) => {
   const { roomId } = req.params;
@@ -45,10 +56,16 @@ roomRouter.get("/:roomId/responses", (req, res) => {
   try {
     const users = getUsers(roomId);
     const order = getOrder(roomId);
-    res.send(SuperJSON.stringify(users.filter((user) => user.id !== userId).map((user) => ({
-      // id: users[order.get(user.id)!].id,
-      answers: users[order.get(user.id)!].answers
-    }))));
+    res.send(
+      SuperJSON.stringify(
+        users
+          .filter((user) => user.id !== userId)
+          .map((user) => ({
+            // id: users[order.get(user.id)!].id,
+            answers: users[order.get(user.id)!].answers,
+          }))
+      )
+    );
   } catch (err) {
     res.status(404);
     res.send(SuperJSON.stringify({ error: (err as Error).message }));
@@ -63,16 +80,29 @@ roomRouter.get("/:roomId/leaderboard", (req, res) => {
     const users = getUsers(roomId);
     const orderRev = getOrderRev(roomId);
     calculatePoints(roomId);
-    res.send(SuperJSON.stringify(users.filter((user) => user.id !== userId).map((user) => ({
-      id: user.id,
-      answers: user.answers,
-      points: user.points,
-      guesses: [...user.guesses].map(([idx, data]) => ({
-        guessedId: data.guessedId,
-        realId: orderRev.get(idx),
-        round: data.round,
-      }))
-    }))));
+    res.send(
+      SuperJSON.stringify(
+        users
+          .filter((user) => user.id !== userId)
+          .map((user) => ({
+            id: user.id,
+            name: user.name,
+            answers: user.answers,
+            points: user.points,
+            guesses: [...user.guesses].map(([idx, data]) => ({
+              guessedUser: {
+                id: data.guessedId,
+                name: users.find((user) => user.id === data.guessedId)!.name,
+              },
+              realUser: {
+                id: orderRev.get(idx),
+                name: users.find((user) => user.id === orderRev.get(idx))!.name,
+              },
+              round: data.round,
+            })),
+          }))
+      )
+    );
   } catch (err) {
     res.status(404);
     res.send(SuperJSON.stringify({ error: (err as Error).message }));

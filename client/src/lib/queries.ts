@@ -34,6 +34,30 @@ export const answersListQuery = (id: string, userId: string) =>
     queryFn: async () =>
       await request({
         route: `/room/${id}/responses?userId=${encodeURIComponent(userId)}`,
-        schema: z.array(z.object({ answers: z.map(z.number(), z.string()) }))
+        schema: z.array(z.object({ answers: z.map(z.number(), z.string()) })),
+      }),
+  });
+
+export const leaderboardQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["room-leaderboard", id],
+    queryFn: async () =>
+      await request({
+        route: `/room/${id}/leaderboard`,
+        schema: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            answers: z.map(z.number(), z.string()),
+            points: z.number(),
+            guesses: z.array(
+              z.object({
+                guessedUser: userSchema,
+                realUser: userSchema,
+                round: z.number(),
+              })
+            ),
+          })
+        ),
       }),
   });

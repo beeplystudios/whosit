@@ -11,8 +11,14 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Textarea } from "./ui/textarea";
 import { userSchema } from "@/lib/schemas";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
-import { answersListQuery } from "@/lib/queries";
+import { answersListQuery, leaderboardQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "./ui/accordion";
 
 const routeApi = getRouteApi("/room/$id/play");
 
@@ -223,7 +229,26 @@ const MatchingStateView = () => {
 };
 
 const FinishedStateView = () => {
-  return <div></div>;
+  const { id } = routeApi.useParams();
+  const { data } = useSuspenseQuery(leaderboardQuery(id));
+
+  return (
+    <div>
+      <Accordion type="single" collapsible className="w-full">
+        {data.map((user) => (
+          <>
+            <AccordionItem value={user.id}>
+              <AccordionTrigger>
+                <p>{user.name}</p>
+                <p>{user.points}</p>
+              </AccordionTrigger>
+              <AccordionContent></AccordionContent>
+            </AccordionItem>
+          </>
+        ))}
+      </Accordion>
+    </div>
+  );
 };
 
 const GameState = () => {
