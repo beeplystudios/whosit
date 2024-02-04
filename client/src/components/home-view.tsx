@@ -5,7 +5,6 @@ import { roomSchema } from "@/lib/schemas";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ChevronRightIcon, PlayIcon } from "@heroicons/react/16/solid";
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
 import {
@@ -186,18 +185,8 @@ export const HomeView = () => {
   //   ["you'remom'sass'sman", "you'remom'sass'sman", "eleanor"],
   // ];
 
-  const [mode, setMode] = useState<"unselected" | "join" | "create">(
-    "unselected"
-  );
-
   const [parent] = useAutoAnimate();
   const params = indexRoute.useSearch();
-
-  useEffect(() => {
-    if (!params.mode) return setMode("unselected");
-
-    setMode(params.mode);
-  }, [params]);
 
   return (
     <main className="h-screen flex items-center">
@@ -206,7 +195,7 @@ export const HomeView = () => {
         className="flex flex-col items-center justify-center gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md"
       >
         <h1 className="text-6xl font-semibold font-whosit">WhosIt!</h1>
-        {mode === "unselected" && (
+        {!params.mode && (
           <div className="flex flex-col gap-3 w-full">
             <Link
               to="/"
@@ -246,13 +235,13 @@ export const HomeView = () => {
             </Link>
           </div>
         )}
-        {mode === "create" && (
+        {params.mode === "create" && (
           <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-stone-800 shadow-orange-700">
             <p className="text-lg font-medium mb-4">Create a new Game!</p>
             <CreateRoom />
           </div>
         )}
-        {mode === "join" && (
+        {params.mode === "join" && (
           <div className="bg-white/70 backdrop-blur-md py-6 px-8 rounded-xl border-2 border-stone-800 shadow-orange-700">
             <p className="text-lg font-medium mb-4">Join a new Game!</p>
             <JoinRoom />
