@@ -33,8 +33,10 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
     console.log(`User with id ${socket.id} left room ${roomId}`);
 
-    removeUser(roomId, socket.id);
-    socket.to(roomId).emit("userLeft");
+    try {
+      removeUser(roomId, socket.id);
+      socket.to(roomId).emit("userLeft");
+    } catch (_) {}
   };
 
   const isHost = (roomId: string) => {
@@ -48,8 +50,10 @@ io.on("connection", (socket) => {
     console.log(`User with id ${socket.id} named ${userName} joined room ${roomId}`);
 
     const user = { id: socket.id, name: userName };
-    addUser(roomId, user);
-    io.to(roomId).except(socket.id).emit("newUser", user);
+    try {
+      addUser(roomId, user);
+      io.to(roomId).except(socket.id).emit("newUser", user);
+    } catch (_) {}
   });
 
   socket.on("leaveRoom", (roomId) => {
@@ -59,46 +63,58 @@ io.on("connection", (socket) => {
   socket.on("startGame", (roomId) => {
     if (!isHost(roomId)) return;
 
-    startGame(roomId);
+    try {
+      startGame(roomId);
 
-    io.to(roomId).emit("gameStarted");
+      io.to(roomId).emit("gameStarted");
+    } catch (_) {}
   });
 
   socket.on("nextRound", (roomId) => {
     if (!isHost(roomId)) return;
 
-    const round = nextRound(roomId);
+    try {
+      const round = nextRound(roomId);
 
-    io.to(roomId).emit("round", round);
+      io.to(roomId).emit("round", round);
+    } catch (_) {}
   })
 
   socket.on("answer", (roomId, answer) => {
-    setUserAnswer(roomId, socket.id, answer);
+    try {
+      setUserAnswer(roomId, socket.id, answer);
 
-    if (allUsersAnswered(roomId)) {
-      io.to(roomId).emit("setStateMatching");
-    }
+      if (allUsersAnswered(roomId)) {
+        io.to(roomId).emit("setStateMatching");
+      }
+    } catch (_) {}
   });
 
   socket.on("setQuestion", (roomId, questionIdx, question) => {
     if (!isHost(roomId)) return;
 
-    setQuestion(roomId, questionIdx, question);
+    try {
+      setQuestion(roomId, questionIdx, question);
 
-    io.to(roomId).emit("questionSet", { questionIdx, question });
+      io.to(roomId).emit("questionSet", { questionIdx, question });
+    } catch (_) {}
   });
 
   socket.on("removeQuestion", (roomId, questionIdx) => {
     if (!isHost(roomId)) return;
 
-    removeQuestion(roomId, questionIdx);
+    try {
+      removeQuestion(roomId, questionIdx);
 
-    io.to(roomId).emit("questionRemoved", questionIdx);
+      io.to(roomId).emit("questionRemoved", questionIdx);
+    } catch (_) {}
   })
 
   socket.on("makeGuess", (roomId, index, guessedUserId) => {
-    makeGuess(roomId, socket.id, index, guessedUserId);
-    io.to(roomId).emit("guessMade", { userId: socket.id, index, guessedUserId });
+    try {
+      makeGuess(roomId, socket.id, index, guessedUserId);
+      io.to(roomId).emit("guessMade", { userId: socket.id, index, guessedUserId });
+    } catch (_) {}
   });
 
   socket.on("disconnecting", () => {
