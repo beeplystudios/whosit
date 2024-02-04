@@ -6,6 +6,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
+  PlayIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
@@ -30,7 +31,13 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
   const queryClient = useQueryClient();
 
   const questionSetHandler = useCallback(
-    ({ questionIdx: index, question: value }: { questionIdx: number, question: string }) => {
+    ({
+      questionIdx: index,
+      question: value,
+    }: {
+      questionIdx: number;
+      question: string;
+    }) => {
       const newData = [...data];
       if (index < newData.length) {
         newData[index] = value;
@@ -38,13 +45,20 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
         newData.push(value);
       }
 
-      queryClient.setQueryData(["room-questions", id], newData)
-    }, [queryClient, data, id]);
+      queryClient.setQueryData(["room-questions", id], newData);
+    },
+    [queryClient, data, id]
+  );
 
   const questionRemovedHandler = useCallback(
     (index: number) => {
-      queryClient.setQueryData(["room-questions", id], data.filter((_, idx) => idx !== index));
-    }, [queryClient, data, id]);
+      queryClient.setQueryData(
+        ["room-questions", id],
+        data.filter((_, idx) => idx !== index)
+      );
+    },
+    [queryClient, data, id]
+  );
 
   useIoEvent({
     eventName: "questionSet",
@@ -60,7 +74,7 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
     schema: questionFormSchema,
     defaultValues: {
       question: "",
-    }
+    },
   });
 
   const io = useIo();
@@ -91,29 +105,53 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
   const [questions] = useAutoAnimate();
 
   return (
-    <div className="flex lg:flex-col flex-col-reverse gap-4">
+    <div className="flex flex-col-reverse gap-4">
       <ScrollArea className="h-48">
-        <div className="flex flex-col gap-2" ref={questions}>
-          {data.map((question, idx) => (
-            <div
-              key={idx}
-              className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8 transition-opacity"
-            >
-              <p className="font-medium">{question}</p>
-              {props.isHost && <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
-                <Button size="icon" onClick={() => moveUp(idx)} disabled={idx === 0}>
-                  <ChevronUpIcon className="h-4 w-4" />
-                </Button>
-                <Button size="icon" onClick={() => moveDown(idx)} disabled={idx === data.length - 1}>
-                  <ChevronDownIcon className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="destructive" onClick={() => removeQuestion(idx)}>
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
-              </div>}
-            </div>
-          ))}
-        </div>
+        {data.length === 0 && (
+          <div className="border-2 h-48 flex flex-col border-stone-800 rounded-md border-dashed items-center justify-center">
+            <p className="font-medium text-lg">There are no questions!</p>
+            <p className="text-sm">
+              You can add questions above to start the round!
+            </p>
+          </div>
+        )}
+        {data.length > 0 && (
+          <div className="flex flex-col gap-2" ref={questions}>
+            {data.map((question, idx) => (
+              <div
+                key={idx}
+                className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8 transition-opacity"
+              >
+                <p className="font-medium">{question}</p>
+                {props.isHost && (
+                  <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
+                    <Button
+                      size="icon"
+                      onClick={() => moveUp(idx)}
+                      disabled={idx === 0}
+                    >
+                      <ChevronUpIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      onClick={() => moveDown(idx)}
+                      disabled={idx === data.length - 1}
+                    >
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => removeQuestion(idx)}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </ScrollArea>
       {props.isHost && (
         <Form {...form}>
@@ -179,9 +217,7 @@ export const RoomView = () => {
   const router = useRouter();
   const io = useIo();
 
-  const startGame = () => {
-    
-  };
+  const startGame = () => {};
 
   useEffect(() => {
     router.subscribe("onBeforeLoad", (data) => {
@@ -196,19 +232,20 @@ export const RoomView = () => {
   return (
     <main className="h-screen flex items-center">
       <div className="flex flex-col gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
-        <div className="flex flex-col item-center justify-between gap-4">
+        <div className="flex item-center justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl font-semibold font-whosit">
+            <h1 className="text-2xl lg:text-3xl font-semibold font-whosit">
               Welcome to the Room
             </h1>
             <p className="font-medium font-mono text-2xl">Join Code: {id}</p>
           </div>
 
-          <Button onClick={startGame}>
+          <Button onClick={startGame} className="gap-2 my-4">
+            <PlayIcon className="h-4 w-4" />
             Start Game
           </Button>
         </div>
-        <div className="flex gap-4 flex-col-reverse lg:flex-row">
+        <div className="flex gap-8 flex-col-reverse">
           <div className="flex-1">
             <p className="text-2xl mb-4 font-medium">
               Players: <span className="font-mono">{data.users.length}/8</span>
