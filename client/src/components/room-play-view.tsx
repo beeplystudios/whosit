@@ -65,7 +65,7 @@ export const AnsweringStateView = () => {
   useIoEvent({
     eventName: "setStateMatching",
     handler: setStateMatching,
-  })
+  });
 
   const question = (
     queryClient.getQueryData(["room-questions", id]) as string[]
@@ -200,8 +200,8 @@ const MatchingStateView = () => {
               </ToggleGroup>
               <Button
                 className="bg-white"
-                onClick={() => lockIn(guesses[idx].userId, idx)}
-                disabled={!guesses[idx] || guesses[idx].isLocked}
+                onClick={() => lockIn(guesses[idx]!.userId, idx)}
+                disabled={!guesses[idx] || guesses[idx]?.isLocked}
               >
                 <span>
                   <LockClosedIcon className="h-4 w-4" />
@@ -217,11 +217,8 @@ const MatchingStateView = () => {
 };
 
 const FinishedStateView = () => {
-  return (
-    <div>
-    </div>
-  );
-}
+  return <div></div>;
+};
 
 const GameState = () => {
   const gameState = useGameStore((s) => s.state);
@@ -282,7 +279,15 @@ export const RoomPlayView = () => {
         setStateAnswering();
       }
     },
-    [setRound, id, queryClient, setStateAnswering, setStateFinished]
+    [
+      setRound,
+      id,
+      queryClient,
+      setStateAnswering,
+      setStateFinished,
+      guesses,
+      io,
+    ]
   );
 
   useIoEvent({

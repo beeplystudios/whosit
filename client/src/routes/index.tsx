@@ -6,6 +6,7 @@ import { HomeView } from "../components/home-view";
 
 const searchSchema = z.object({
   mode: z.enum(["create", "join"]).optional(),
+  code: z.string().optional(),
 });
 
 export const indexRoute = createRoute({

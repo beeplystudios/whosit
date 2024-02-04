@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
+import { nameStore } from "@/lib/name-store";
 
 const indexRoute = getRouteApi("/");
 
@@ -50,8 +51,8 @@ const CreateRoom = () => {
       },
     });
 
+    nameStore.setState({ name: values.name });
     io.emit("joinRoom", room.id, values.name);
-    // setName(values.name);
 
     navigate({
       to: "/room/$id",
@@ -93,11 +94,12 @@ const CreateRoom = () => {
 };
 
 const JoinRoom = () => {
+  const { code } = indexRoute.useSearch();
   const form = useZodForm({
     schema: joinFormSchema,
     defaultValues: {
       name: "",
-      code: "",
+      code,
     },
   });
 
@@ -105,6 +107,7 @@ const JoinRoom = () => {
   const navigate = useNavigate();
 
   const onSubmit = (values: z.infer<typeof joinFormSchema>) => {
+    nameStore.setState({ name: values.name });
     io.emit("joinRoom", values.code, values.name);
 
     navigate({
