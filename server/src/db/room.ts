@@ -189,6 +189,8 @@ export const makeGuess = (roomId: string, userId: string, index: number, guessed
   if (!user) {
     throw new Error(`User with id ${userId} does not exist in room with id ${roomId}!`);
   }
+
+  if (!!user.guesses.get(index)) return;
   
   user.guesses.set(index, guessedUserId);
 }

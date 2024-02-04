@@ -62,6 +62,11 @@ export const AnsweringStateView = () => {
 
   useTimerLoop(10, setStateMatching);
 
+  useIoEvent({
+    eventName: "setStateMatching",
+    handler: setStateMatching,
+  })
+
   const question = (
     queryClient.getQueryData(["room-questions", id]) as string[]
   )[round];
@@ -153,11 +158,16 @@ const MatchingStateView = () => {
   };
 
   const toggleUserValue = (value: string, idx: number) => {
-    setGuess(idx, value);
+    if (guesses[idx]?.userId ?? "" === value) {
+      setGuess(idx, undefined);
+    } else {
+      setGuess(idx, value);
+    }
     // io.emit("makeGuess", id, idx, value);
   };
 
   const lockIn = (value: string, idx: number) => {
+    setGuess(idx, value, true);
     io.emit("makeGuess", id, idx, value);
   };
 
@@ -176,8 +186,9 @@ const MatchingStateView = () => {
               <ToggleGroup
                 type="single"
                 className="my-2"
-                value={guesses[idx]}
+                value={guesses[idx]?.userId ?? undefined}
                 onValueChange={(value) => toggleUserValue(value, idx)}
+                disabled={!!guesses[idx]?.isLocked}
               >
                 {members.users
                   .filter((user) => user.id !== io.id)
@@ -189,7 +200,8 @@ const MatchingStateView = () => {
               </ToggleGroup>
               <Button
                 className="bg-white"
-                onClick={() => lockIn(guesses[idx], idx)}
+                onClick={() => lockIn(guesses[idx].userId, idx)}
+                disabled={!guesses[idx] || guesses[idx].isLocked}
               >
                 <span>
                   <LockClosedIcon className="h-4 w-4" />
@@ -204,6 +216,13 @@ const MatchingStateView = () => {
   );
 };
 
+const FinishedStateView = () => {
+  return (
+    <div>
+    </div>
+  );
+}
+
 const GameState = () => {
   const gameState = useGameStore((s) => s.state);
 
@@ -217,7 +236,9 @@ const GameState = () => {
     return <MatchingStateView />;
   }
 
-  return <div></div>;
+  if (gameState === "finished") {
+    return <FinishedStateView />;
+  }
 };
 
 export const RoomPlayView = () => {
@@ -225,6 +246,7 @@ export const RoomPlayView = () => {
   const [
     state,
     timeLeft,
+    guesses,
     round,
     setRound,
     setStateFinished,
@@ -232,6 +254,7 @@ export const RoomPlayView = () => {
   ] = useGameStore((s) => [
     s.state,
     s.timeLeft,
+    s.guesses,
     s.round,
     s.setRound,
     s.setStateFinished,
@@ -247,6 +270,13 @@ export const RoomPlayView = () => {
         (queryClient.getQueryData(["room-questions", id]) as string[]).length
       ) {
         setStateFinished();
+        for (const [index, data] of Object.entries(guesses)) {
+          if (data) {
+            if (!data.isLocked) {
+              io.emit("makeGuess", id, index, data.userId);
+            }
+          }
+        }
       } else {
         setRound(round);
         setStateAnswering();
