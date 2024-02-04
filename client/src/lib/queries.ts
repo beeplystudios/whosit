@@ -41,6 +41,7 @@ export const answersListQuery = (id: string, userId: string) =>
           })
         ),
       }),
+    // refetchInterval: 250,
   });
 
 export const leaderboardQuery = (id: string) =>
