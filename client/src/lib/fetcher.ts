@@ -1,7 +1,7 @@
 import { z } from "zod";
 import SuperJSON from "superjson";
 
-const SERVER_URL = "http://localhost:3000";
+const SERVER_URL = import.meta.env.DEV ? "http://localhost:3000" : "https://whosit-server.fly.dev";
 
 type RequestOptions<T> =
   | {

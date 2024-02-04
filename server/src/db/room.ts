@@ -45,6 +45,10 @@ export const removeUser = (roomId: string, userId: string) => {
     throw new Error(`User with id ${userId} does not exist in room with id ${roomId}!`);
   }
 
+  if (room.users.size === 0) {
+    rooms.delete(roomId);
+  }
+
   return room;
 }
 

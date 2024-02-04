@@ -15,7 +15,7 @@ export const ConnectionWrapper: React.FC<{
   useEffect(() => {
     if (ioRef.current) return;
 
-    ioRef.current = io("http://localhost:3000");
+    ioRef.current = io(import.meta.env.DEV ? "http://localhost:3000" : "https://whosit-server.fly.dev");
 
     const now = Date.now();
     setStatus({ type: "connecting" });
