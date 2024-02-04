@@ -29,6 +29,10 @@ export const addUser = (id: string, userData: { id: string, name: string }) => {
     throw new Error(`Room with id ${id} not found!`);
   }
 
+  if (room.started) {
+    throw new Error(`Room with ${id} is not accepting new users`);
+  }
+
   const user = { ...userData, points: 0, answers: new Map(), guesses: new Map() };
   room.users.set(user.id, user);
 
