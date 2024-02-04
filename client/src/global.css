@@ -75,6 +75,6 @@
     @apply border-border;
   }
   body {
-    @apply h-screen bg-gradient-to-br from-orange-300 to-pink-700 text-foreground;
+    @apply h-screen bg-gradient-to-br from-orange-300 to-pink-700 text-foreground bg-cover;
   }
 }
