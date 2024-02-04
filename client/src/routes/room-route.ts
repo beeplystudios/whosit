@@ -2,6 +2,7 @@ import { RoomView } from "@/components/room-view";
 import { memberListQuery } from "@/lib/queries";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "./__root";
+import { RoomPlayView } from "@/components/room-play-view";
 
 export const roomRoute = createRoute({
   getParentRoute: () => rootRoute,
