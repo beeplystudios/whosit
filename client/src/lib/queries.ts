@@ -34,7 +34,12 @@ export const answersListQuery = (id: string, userId: string) =>
     queryFn: async () =>
       await request({
         route: `/room/${id}/responses?userId=${encodeURIComponent(userId)}`,
-        schema: z.array(z.object({ answers: z.map(z.number(), z.string()) })),
+        schema: z.array(
+          z.object({
+            answers: z.map(z.number(), z.string()),
+            mine: z.boolean(),
+          })
+        ),
       }),
   });
 
