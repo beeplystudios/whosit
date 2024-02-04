@@ -5,7 +5,7 @@ import cors from "cors";
 import { roomRouter } from "./routers/room-router";
 import SuperJSON from "superjson";
 import bodyParser from "body-parser";
-import { addUser, removeUser } from "./db/room";
+import { addUser, getHost, getUsers, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
 
 const jsonParser = bodyParser.json();
 
@@ -33,12 +33,13 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
     console.log(`User with id ${socket.id} left room ${roomId}`);
 
-    try {
-      removeUser(roomId, socket.id);
-      socket.to(roomId).emit("userLeft");
-    } catch (err) {
-      // uhhh
-    }
+    removeUser(roomId, socket.id);
+    socket.to(roomId).emit("userLeft");
+  };
+
+  const isHost = (roomId: string) => {
+    const hostId = getHost(roomId);
+    return hostId === socket.id;
   };
   
   console.log(`Client with id ${socket.id} connected`);
@@ -46,18 +47,50 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     console.log(`User with id ${socket.id} named ${userName} joined room ${roomId}`);
 
-    try {
-      const user = { id: socket.id, name: userName };
-      addUser(roomId, user);
-      io.to(roomId).except(socket.id).emit("newUser", user);
-    } catch (err) {
-      // uhhhh
-    }
+    const user = { id: socket.id, name: userName };
+    addUser(roomId, user);
+    io.to(roomId).except(socket.id).emit("newUser", user);
   });
 
   socket.on("leaveRoom", (roomId) => {
     leave(roomId);
   });
+
+  socket.on("startGame", (roomId) => {
+    if (!isHost(roomId)) return;
+
+    startGame(roomId);
+
+    io.to(roomId).emit("gameStarted");
+  });
+
+  socket.on("nextRound", (roomId) => {
+    if (!isHost(roomId)) return;
+
+    const round = nextRound(roomId);
+
+    io.to(roomId).emit("round", round);
+  })
+
+  socket.on("answer", (roomId, questionIdx, answer) => {
+    setUserAnswer(roomId, socket.id, questionIdx, answer);
+  });
+
+  socket.on("setQuestion", (roomId, questionIdx, question) => {
+    if (!isHost(roomId)) return;
+
+    setQuestion(roomId, questionIdx, question);
+
+    io.to(roomId).emit("questionSet", { questionIdx, question });
+  });
+
+  socket.on("removeQuestion", (roomId, questionIdx) => {
+    if (!isHost(roomId)) return;
+
+    removeQuestion(roomId, questionIdx);
+
+    io.to(roomId).emit("questionRemoved", questionIdx);
+  })
 
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {

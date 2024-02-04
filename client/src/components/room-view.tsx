@@ -1,6 +1,6 @@
 import { useIo, useIoEvent } from "@/lib/connection";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
-import { memberListQuery } from "@/lib/queries";
+import { memberListQuery, questionListQuery } from "@/lib/queries";
 import { userSchema } from "@/lib/schemas";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
@@ -26,22 +26,82 @@ const questionFormSchema = z.object({
 
 const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
   const { id } = roomRoute.useParams();
-  // const { data } = useSuspenseQuery(questionListQuery(id));
-  const { data } = {
-    data: [
-      "Why did you eat the slug?",
-      "Are you Okay?",
-      "Did you also fall out the window into a sewer when you were a child?",
-      "Why do you want to be a software engineer?",
-      "Who ate your rabbit as a child?",
-    ],
-  };
-  const form = useZodForm({
-    schema: questionFormSchema,
+  const { data, refetch } = useSuspenseQuery(questionListQuery(id));
+  const queryClient = useQueryClient();
+
+  const questionSetHandler = 
+    ({ questionIndex: index, question: value }: { questionIndex: number, question: string }) => {
+      console.log("Question set:", value);
+      const newData = data;
+      if (index < newData.length) {
+        newData[index] = value;
+      } else {
+        newData.push(value);
+      }
+
+      // queryClient.setQueryData(["room-questions", id], newData)
+      refetch();
+    };
+
+  const questionRemovedHandler = 
+    (index: number) => {
+      const newData = data;
+
+      newData.splice(index);
+
+      // queryClient.setQueryData(["room-questions", id], newData);
+      refetch();
+    };
+
+  useIoEvent({
+    eventName: "questionSet",
+    handler: questionSetHandler,
   });
 
+  useIoEvent({
+    eventName: "questionRemoved",
+    handler: questionRemovedHandler,
+  });
+
+  // const { data } = {
+  //   data: [
+  //     "Why did you eat the slug?",
+  //     "Are you Okay?",
+  //     "Did you also fall out the window into a sewer when you were a child?",
+  //     "Why do you want to be a software engineer?",
+  //     "Who ate your rabbit as a child?",
+  //   ],
+  // };
+  const form = useZodForm({
+    schema: questionFormSchema,
+    defaultValues: {
+      question: "",
+    }
+  });
+
+  const io = useIo();
+
   const onSubmit = (values: z.infer<typeof questionFormSchema>) => {
-    console.log(values);
+    // io.emit("setQuestion", id, data.length, values.question);
+    queryClient.setQueryData(["room-questions", id], ["a"]);
+  };
+
+  const moveUp = (index: number) => {
+    const current = data[index];
+    const prev = data[index - 1];
+    io.emit("setQuestion", id, index, prev);
+    io.emit("setQuestion", id, index - 1, current);
+  };
+
+  const moveDown = (index: number) => {
+    const current = data[index];
+    const next = data[index + 1];
+    io.emit("setQuestion", id, index, next);
+    io.emit("setQuestion", id, index + 1, current);
+  };
+
+  const removeQuestion = (index: number) => {
+    io.emit("removeQuestion", id, index);
   };
 
   const [questions] = useAutoAnimate();
@@ -57,13 +117,13 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
             >
               <p className="font-medium">{question}</p>
               <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
-                <Button size="icon">
+                <Button size="icon" onClick={() => moveUp(idx)} disabled={idx === 0}>
                   <ChevronUpIcon className="h-4 w-4" />
                 </Button>
-                <Button size="icon">
+                <Button size="icon" onClick={() => moveDown(idx)} disabled={idx === data.length - 1}>
                   <ChevronDownIcon className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="destructive">
+                <Button size="icon" variant="destructive" onClick={() => removeQuestion(idx)}>
                   <TrashIcon className="h-4 w-4" />
                 </Button>
               </div>

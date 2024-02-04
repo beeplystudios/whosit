@@ -25,4 +25,5 @@ export const questionListQuery = (id: string) =>
         route: `/room/${id}/questions`,
         schema: z.array(z.string()),
       }),
+    refetchOnWindowFocus: false,
   });

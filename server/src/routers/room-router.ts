@@ -1,5 +1,5 @@
 import express from "express";
-import { createRoom, getHost, getUsers } from "../db/room";
+import { createRoom, getHost, getQuestions, getUsers } from "../db/room";
 import SuperJSON from "superjson";
 
 export const roomRouter = express.Router();
@@ -16,6 +16,20 @@ roomRouter.get("/:roomId/users", (req, res) => {
   try {
     const users = getUsers(roomId);
     res.send(SuperJSON.stringify({ hostId: getHost(roomId), users }));
+  } catch (err) {
+    res.status(404);
+    res.send(SuperJSON.stringify({ error: (err as Error).message }));
+  }
+})
+
+roomRouter.get("/:roomId/questions", (req, res) => {
+  const { roomId } = req.params;
+
+  console.log("GET questions");
+
+  try {
+    const questions = getQuestions(roomId);
+    res.send(SuperJSON.stringify(questions));
   } catch (err) {
     res.status(404);
     res.send(SuperJSON.stringify({ error: (err as Error).message }));

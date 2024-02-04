@@ -2,8 +2,11 @@ import { User } from "./user";
 
 export type Room = {
   id: string;
-  hostId: string,
+  hostId: string;
+  questions: string[];
   users: Map<string, User>;
+  started: boolean;
+  round: number;
 };
 
 const rooms: Map<string, Room> = new Map();
@@ -11,18 +14,19 @@ const rooms: Map<string, Room> = new Map();
 export const createRoom = (hostId: string) => {
   const code = Math.random().toString(36).substring(2, 8);
 
-  const room = { id: code, hostId, users: new Map() };
+  const room = { id: code, hostId, questions: [], users: new Map(), started: false, round: 0 };
   rooms.set(code, room);
 
   return room;
 };
 
-export const addUser = (id: string, user: User) => {
+export const addUser = (id: string, userData: { id: string, name: string }) => {
   const room = rooms.get(id);
   if (!room) {
     throw new Error(`Room with id ${id} not found!`);
   }
   
+  const user = { ...userData, points: 0, answers: new Map() };
   room.users.set(user.id, user);
 
   return room;
@@ -57,4 +61,75 @@ export const getHost = (roomId: string) => {
   }
 
   return room.hostId;
+}
+
+export const setQuestion = (roomId: string, questionIdx: number, value: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  if (room.started) {
+    throw new Error(`Can't set questions on started room (${roomId})`);
+  }
+
+  if (room.questions.length <= questionIdx) {
+    room.questions.push(value);
+  } else {
+    room.questions[questionIdx] = value;
+  }
+}
+
+export const removeQuestion = (roomId: string, questionIdx: number) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  if (room.started) {
+    throw new Error(`Can't remove questions on started room (${roomId})`);
+  }
+
+  room.questions.splice(questionIdx);
+}
+
+export const getQuestions = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+  
+  return room.questions;
+}
+
+export const setUserAnswer = (roomId: string, userId: string, questionIdx: number, answer: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  const user = room.users.get(userId);
+  if (!user) {
+    throw new Error(`User with id ${userId} does not exist in room with id ${roomId}!`);
+  }
+
+  user.answers.set(questionIdx, answer);
+}
+
+export const startGame = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+
+  room.started = true;  
+}
+
+export const nextRound = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+  
+  room.round += 1;
 }

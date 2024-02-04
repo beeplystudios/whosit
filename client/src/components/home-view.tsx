@@ -95,6 +95,10 @@ const CreateRoom = () => {
 const JoinRoom = () => {
   const form = useZodForm({
     schema: joinFormSchema,
+    defaultValues: {
+      name: "",
+      code: "",
+    },
   });
 
   const io = useIo();
