@@ -238,6 +238,8 @@ const FinishedStateView = () => {
   const { id } = routeApi.useParams();
   const { data } = useSuspenseQuery(leaderboardQuery(id));
 
+  console.log(data);
+
   return (
     <div>
       <Accordion

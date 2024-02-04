@@ -59,9 +59,9 @@ roomRouter.get("/:roomId/responses", (req, res) => {
     res.send(
       SuperJSON.stringify(
         users
-          .filter((user) => user.id !== userId)
           .map((user) => ({
             // id: users[order.get(user.id)!].id,
+            mine: users[order.get(user.id)!].id === userId,
             answers: users[order.get(user.id)!].answers,
           }))
       )
