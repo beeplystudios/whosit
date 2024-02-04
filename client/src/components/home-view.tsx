@@ -199,7 +199,7 @@ export const HomeView = () => {
       >
         <h1 className="text-6xl font-semibold font-whosit">WhosIt!</h1>
         {!params.mode && (
-          <div className="flex flex-col gap-3 w-full">
+          <div className="flex flex-col gap-3 w-full lg:max-w-xl">
             <Link
               to="/"
               search={{ mode: "create" }}
