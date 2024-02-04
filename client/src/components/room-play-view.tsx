@@ -1,7 +1,11 @@
 import { useIo, useIoEvent } from "@/lib/connection";
 import { useGameStore } from "@/lib/game";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
-import { ChevronRightIcon, LockClosedIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronRightIcon,
+  InformationCircleIcon,
+  LockClosedIcon,
+} from "@heroicons/react/16/solid";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -19,6 +23,14 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "./ui/accordion";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "./ui/table";
 
 const routeApi = getRouteApi("/room/$id/play");
 
@@ -99,7 +111,18 @@ export const AnsweringStateView = () => {
   };
 
   return (
-    <div className="flex items-center h-[50vh]">
+    <div className="flex justify-center flex-col items-center py-8">
+      <h1 className="font-whosit text-5xl font-bold my-4 text-center">
+        Answer!
+      </h1>
+      <div className="bg-pink-400/60 p-4 rounded-md border-2 border-stone-800 flex items-center gap-4 my-4">
+        <InformationCircleIcon className="h-4 w-4" />
+        <p className="max-w-2xl font-medium">
+          Answer the question below, and try to be as honest as possible!
+          Remember, the overarching goal is to share yourself and get to know
+          others!
+        </p>
+      </div>
       <div className="flex flex-col items-center mx-auto w-full h-max">
         <div className="flex flex-col items-center gap-4 justify-center w-[90%] md:w-3/4 lg:w-1/2 bg-orange-500/25 rounded-3xl px-4 md:px-8 py-5 border-4 border-stone-800 shadow-rose-700 shadow-md">
           {answered && (
@@ -155,7 +178,7 @@ const MatchingStateView = () => {
 
   const { data } = useSuspenseQuery(answersListQuery(id, io.id!));
 
-  useTimerLoop(10, () => {
+  useTimerLoop(120, () => {
     io.emit("nextRound", id);
   });
   const queryClient = useQueryClient();
@@ -184,52 +207,64 @@ const MatchingStateView = () => {
   };
 
   return (
-    <div>
-      {data.map((unknownUser, idx) => (
-        <>
-          {unknownUser.mine ? null : (
-            <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3">
-              {[...unknownUser.answers].map(([questionIdx, answer]) => (
-                <div className="flex flex-col gap-1">
-                  <p className="text-xl font-medium">
-                    {questions[questionIdx]}
-                  </p>
-                  <p className={cn(answer === "" && "italic")}>
-                    {answer === "" ? "No answer provided" : answer}
-                  </p>
+    <div className="flex justify-center flex-col items-center py-8">
+      <h1 className="font-whosit text-5xl font-bold my-4 text-center">
+        Now Match!
+      </h1>
+      <div className="bg-pink-400/60 p-4 rounded-md border-2 border-stone-800 flex items-center gap-4 my-4">
+        <InformationCircleIcon className="h-4 w-4" />
+        <p className="max-w-2xl font-medium">
+          Try your best to match each card to a person based on their responses
+          to the questions! If you're sure of your choice, lock it in!
+        </p>
+      </div>
+      <div className="grid gap-4 w-full md:grid-cols-2 grid-cols-1">
+        {data.map((unknownUser, idx) => (
+          <>
+            {unknownUser.mine ? null : (
+              <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3 w-full">
+                {[...unknownUser.answers].map(([questionIdx, answer]) => (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xl font-medium">
+                      {questions[questionIdx]}
+                    </p>
+                    <p className={cn(answer === "" && "italic")}>
+                      {answer === "" ? "No answer provided" : answer}
+                    </p>
+                  </div>
+                ))}
+                <div className="flex items-center gap-4 justify-between">
+                  <ToggleGroup
+                    type="single"
+                    className="my-2"
+                    value={guesses[idx]?.userId ?? undefined}
+                    onValueChange={(value) => toggleUserValue(value, idx)}
+                    disabled={!!guesses[idx]?.isLocked}
+                  >
+                    {members.users
+                      .filter((user) => user.id !== io.id)
+                      .map((user) => (
+                        <ToggleGroupItem value={user.id} key={user.id}>
+                          {user.name}
+                        </ToggleGroupItem>
+                      ))}
+                  </ToggleGroup>
+                  <Button
+                    className="bg-white"
+                    onClick={() => lockIn(guesses[idx]!.userId, idx)}
+                    disabled={!guesses[idx] || guesses[idx]?.isLocked}
+                  >
+                    <span>
+                      <LockClosedIcon className="h-4 w-4" />
+                    </span>
+                    Lock In
+                  </Button>
                 </div>
-              ))}
-              <div className="flex items-center gap-4">
-                <ToggleGroup
-                  type="single"
-                  className="my-2"
-                  value={guesses[idx]?.userId ?? undefined}
-                  onValueChange={(value) => toggleUserValue(value, idx)}
-                  disabled={!!guesses[idx]?.isLocked}
-                >
-                  {members.users
-                    .filter((user) => user.id !== io.id)
-                    .map((user) => (
-                      <ToggleGroupItem value={user.id} key={user.id}>
-                        {user.name}
-                      </ToggleGroupItem>
-                    ))}
-                </ToggleGroup>
-                <Button
-                  className="bg-white"
-                  onClick={() => lockIn(guesses[idx]!.userId, idx)}
-                  disabled={!guesses[idx] || guesses[idx]?.isLocked}
-                >
-                  <span>
-                    <LockClosedIcon className="h-4 w-4" />
-                  </span>
-                  Lock In
-                </Button>
               </div>
-            </div>
-          )}
-        </>
-      ))}
+            )}
+          </>
+        ))}
+      </div>
     </div>
   );
 };
@@ -241,12 +276,9 @@ const FinishedStateView = () => {
   console.log(data);
 
   return (
-    <div>
-      <Accordion
-        type="single"
-        collapsible
-        className="w-full flex gap-4 flex-col my-8"
-      >
+    <div className="flex justify-center flex-col items-center py-8">
+      <h1 className="font-whosit text-5xl font-bold my-4">Leaderboard</h1>
+      <Accordion type="multiple" className="w-full flex gap-4 flex-col my-8">
         {data.map((user) => (
           <>
             <AccordionItem value={user.id}>
@@ -254,7 +286,36 @@ const FinishedStateView = () => {
                 <p className="text-lg font-medium">{user.name}</p>
                 <p className="font-mono">{user.points}</p>
               </AccordionTrigger>
-              <AccordionContent></AccordionContent>
+              <AccordionContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Guessed User</TableHead>
+                      <TableHead>Real User</TableHead>
+                      <TableHead>Round</TableHead>
+                      <TableHead>Points</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {user.guesses.map((guess, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{guess.guessedUser.name}</TableCell>
+                        <TableCell>{guess.realUser.name}</TableCell>
+                        <TableCell>{guess.round + 1}</TableCell>
+                        <TableCell className="font-mono text-emerald-500">
+                          {guess.guessedUser.id === guess.realUser.id
+                            ? guess.round === 0
+                              ? `+${20}`
+                              : guess.round === 1
+                                ? `+${15}`
+                                : `+${10}`
+                            : "None"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </AccordionContent>
             </AccordionItem>
           </>
         ))}
@@ -349,12 +410,14 @@ export const RoomPlayView = () => {
 
   return (
     <main className="max-w-[100rem] py-6 px-4 md:mx-auto md:w-[70%]">
-      <nav className="flex justify-between items-center gap-8 w-full mx-auto md:w-3/4 lg:w-1/2 bg-orange-500/25 rounded-3xl h-max p-6 border-4 border-stone-800 shadow-rose-700 shadow-md">
-        <p className="font-semibold text-xls">{me.name}</p>
+      <nav className="flex justify-between items-center gap-8 w-full mx-auto md:max-w-fit bg-orange-500/25 rounded-3xl h-max p-6 border-4 border-stone-800 shadow-rose-700 shadow-md">
+        <p className="font-semibold text-xl whitespace-nowrap">
+          My Nickname: {me.name}
+        </p>
         <p className="text-3xl bg-pink-600 p-4 font-bold rounded-full h-14 w-14 flex items-center justify-center border-2 border-stone-800">
           {timeLeft}
         </p>
-        <p className="font-mono text-lg text-emerald-950 bg-emerald-300 px-4 rounded-full border-2 border-stone-800">
+        <p className="font-mono text-lg text-emerald-950 bg-emerald-300 px-4 rounded-full border-2 border-stone-800 w-max whitespace-nowrap">
           {state === "finished" ? "Game Over" : `Round: ${round + 1}`}
         </p>
       </nav>

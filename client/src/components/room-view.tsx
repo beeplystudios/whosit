@@ -247,7 +247,7 @@ export const RoomView = () => {
 
   return (
     <main className="h-screen flex items-center">
-      <div className="flex flex-col gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
+      <div className="flex flex-col gap-8 my-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
         <div className="flex item-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl lg:text-3xl font-semibold font-whosit">
@@ -257,7 +257,11 @@ export const RoomView = () => {
           </div>
 
           {data.hostId === io.id && (
-            <Button onClick={startGame} className="gap-2 my-4">
+            <Button
+              onClick={startGame}
+              className="gap-2 my-4"
+              disabled={data.users.length <= 1}
+            >
               <PlayIcon className="h-4 w-4" />
               Start Game
             </Button>
