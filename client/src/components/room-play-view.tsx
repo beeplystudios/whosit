@@ -84,7 +84,7 @@ export const AnsweringStateView = () => {
       io.emit("answer", id, "");
     }
 
-    setStateMatching();
+    // setStateMatching();
   });
 
   useIoEvent({

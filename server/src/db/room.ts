@@ -134,7 +134,7 @@ export const allUsersAnswered = (roomId: string) => {
   }
   
   const users = [...room.users.values()];
-  return users.every((user) => !!user.answers.get(room.round));
+  return users.every((user) => user.answers.get(room.round) !== undefined);
 }
 
 export const startGame = (roomId: string) => {
