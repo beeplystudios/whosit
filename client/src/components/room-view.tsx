@@ -3,7 +3,12 @@ import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { memberListQuery } from "@/lib/queries";
 import { userSchema } from "@/lib/schemas";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { PlusIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@heroicons/react/16/solid";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import React, { Suspense, useCallback, useEffect } from "react";
@@ -48,9 +53,20 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
           {data.map((question, idx) => (
             <div
               key={idx}
-              className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md"
+              className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8"
             >
               <p className="font-medium">{question}</p>
+              <div className="group-hover:flex hidden gap-2">
+                <Button size="icon">
+                  <ChevronUpIcon className="h-4 w-4" />
+                </Button>
+                <Button size="icon">
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="destructive">
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
