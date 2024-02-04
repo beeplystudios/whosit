@@ -21,11 +21,11 @@ import { Input } from "./ui/input";
 const indexRoute = getRouteApi("/");
 
 const createFormSchema = z.object({
-  name: z.string(),
+  name: z.string().min(3),
 });
 
 const joinFormSchema = z.object({
-  name: z.string(),
+  name: z.string().min(3),
   code: z.string(),
 });
 

@@ -26,32 +26,25 @@ const questionFormSchema = z.object({
 
 const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
   const { id } = roomRoute.useParams();
-  const { data, refetch } = useSuspenseQuery(questionListQuery(id));
+  const { data } = useSuspenseQuery(questionListQuery(id));
   const queryClient = useQueryClient();
 
-  const questionSetHandler = 
-    ({ questionIndex: index, question: value }: { questionIndex: number, question: string }) => {
-      console.log("Question set:", value);
-      const newData = data;
+  const questionSetHandler = useCallback(
+    ({ questionIdx: index, question: value }: { questionIdx: number, question: string }) => {
+      const newData = [...data];
       if (index < newData.length) {
         newData[index] = value;
       } else {
         newData.push(value);
       }
 
-      // queryClient.setQueryData(["room-questions", id], newData)
-      refetch();
-    };
+      queryClient.setQueryData(["room-questions", id], newData)
+    }, [queryClient, data, id]);
 
-  const questionRemovedHandler = 
+  const questionRemovedHandler = useCallback(
     (index: number) => {
-      const newData = data;
-
-      newData.splice(index);
-
-      // queryClient.setQueryData(["room-questions", id], newData);
-      refetch();
-    };
+      queryClient.setQueryData(["room-questions", id], data.filter((_, idx) => idx !== index));
+    }, [queryClient, data, id]);
 
   useIoEvent({
     eventName: "questionSet",
@@ -63,15 +56,6 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
     handler: questionRemovedHandler,
   });
 
-  // const { data } = {
-  //   data: [
-  //     "Why did you eat the slug?",
-  //     "Are you Okay?",
-  //     "Did you also fall out the window into a sewer when you were a child?",
-  //     "Why do you want to be a software engineer?",
-  //     "Who ate your rabbit as a child?",
-  //   ],
-  // };
   const form = useZodForm({
     schema: questionFormSchema,
     defaultValues: {
@@ -82,8 +66,8 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
   const io = useIo();
 
   const onSubmit = (values: z.infer<typeof questionFormSchema>) => {
-    // io.emit("setQuestion", id, data.length, values.question);
-    queryClient.setQueryData(["room-questions", id], ["a"]);
+    io.emit("setQuestion", id, data.length, values.question);
+    form.reset();
   };
 
   const moveUp = (index: number) => {
@@ -116,7 +100,7 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
               className="bg-white/60 py-3 px-4 border-2 border-stone-800 rounded-md group flex items-center justify-between gap-8 transition-opacity"
             >
               <p className="font-medium">{question}</p>
-              <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
+              {props.isHost && <div className="group-hover:opacity-100 opacity-0 gap-2 flex">
                 <Button size="icon" onClick={() => moveUp(idx)} disabled={idx === 0}>
                   <ChevronUpIcon className="h-4 w-4" />
                 </Button>
@@ -126,7 +110,7 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
                 <Button size="icon" variant="destructive" onClick={() => removeQuestion(idx)}>
                   <TrashIcon className="h-4 w-4" />
                 </Button>
-              </div>
+              </div>}
             </div>
           ))}
         </div>

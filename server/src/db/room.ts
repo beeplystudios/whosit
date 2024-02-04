@@ -90,7 +90,7 @@ export const removeQuestion = (roomId: string, questionIdx: number) => {
     throw new Error(`Can't remove questions on started room (${roomId})`);
   }
 
-  room.questions.splice(questionIdx);
+  room.questions = room.questions.filter((_, idx) => idx !== questionIdx);
 }
 
 export const getQuestions = (roomId: string) => {
