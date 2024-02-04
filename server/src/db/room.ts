@@ -118,6 +118,16 @@ export const setUserAnswer = (roomId: string, userId: string, answer: string) =>
   user.answers.set(room.round, answer);
 }
 
+export const allUsersAnswered = (roomId: string) => {
+  const room = rooms.get(roomId);
+  if (!room) {
+    throw new Error(`Room with id ${roomId} not found!`);
+  }
+  
+  const users = [...room.users.values()];
+  return users.every((user) => !!user.answers.get(room.round));
+}
+
 export const startGame = (roomId: string) => {
   const room = rooms.get(roomId);
   if (!room) {

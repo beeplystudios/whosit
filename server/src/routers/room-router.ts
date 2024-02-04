@@ -40,12 +40,13 @@ roomRouter.get("/:roomId/questions", (req, res) => {
 
 roomRouter.get("/:roomId/responses", (req, res) => {
   const { roomId } = req.params;
+  const { userId } = req.query;
 
   try {
     const users = getUsers(roomId);
     const order = getOrder(roomId);
-    res.send(SuperJSON.stringify(users.map((user) => ({
-      id: users[order.get(user.id)!].id,
+    res.send(SuperJSON.stringify(users.filter((user) => user.id !== userId).map((user) => ({
+      // id: users[order.get(user.id)!].id,
       answers: users[order.get(user.id)!].answers
     }))));
   } catch (err) {

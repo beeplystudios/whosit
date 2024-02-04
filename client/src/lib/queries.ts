@@ -27,3 +27,13 @@ export const questionListQuery = (id: string) =>
       }),
     refetchOnWindowFocus: false,
   });
+
+export const answersListQuery = (id: string, userId: string) =>
+  queryOptions({
+    queryKey: ["room-answers", id],
+    queryFn: async () =>
+      await request({
+        route: `/room/${id}/responses?userId=${encodeURIComponent(userId)}`,
+        schema: z.array(z.object({ answers: z.map(z.number(), z.string()) }))
+      }),
+  });

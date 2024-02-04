@@ -5,7 +5,7 @@ import cors from "cors";
 import { roomRouter } from "./routers/room-router";
 import SuperJSON from "superjson";
 import bodyParser from "body-parser";
-import { addUser, getHost, makeGuess, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
+import { addUser, allUsersAnswered, getHost, makeGuess, nextRound, removeQuestion, removeUser, setQuestion, setUserAnswer, startGame } from "./db/room";
 
 const jsonParser = bodyParser.json();
 
@@ -74,6 +74,10 @@ io.on("connection", (socket) => {
 
   socket.on("answer", (roomId, answer) => {
     setUserAnswer(roomId, socket.id, answer);
+
+    if (allUsersAnswered(roomId)) {
+      io.to(roomId).emit("setStateMatching");
+    }
   });
 
   socket.on("setQuestion", (roomId, questionIdx, question) => {

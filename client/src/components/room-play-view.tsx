@@ -2,15 +2,16 @@ import { useIo, useIoEvent } from "@/lib/connection";
 import { useGameStore } from "@/lib/game";
 import { useZodForm } from "@/lib/hooks/use-zod-form";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Textarea } from "./ui/textarea";
 import { userSchema } from "@/lib/schemas";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { answersListQuery } from "@/lib/queries";
 
 const routeApi = getRouteApi("/room/$id/play");
 
@@ -131,23 +132,17 @@ export const AnsweringStateView = () => {
 };
 const MatchingStateView = () => {
   const { id } = routeApi.useParams();
+  const [guesses, setGuess] = useGameStore((s) => [s.guesses, s.setGuess]);
   const io = useIo();
+
+  const { data } = useSuspenseQuery(answersListQuery(id, io.id!));
 
   useTimerLoop(10, () => {
     io.emit("nextRound", id);
   });
   const queryClient = useQueryClient();
 
-  const data = [
-    {
-      question: "What was the weirdest thing you ate as a kid?",
-      answer: "I ate a slug as a kid, it was on purpose",
-    },
-    {
-      question: "What was the weirdest thing you ate as a kid?",
-      answer: "I ate a slug as a kid, it was on purpose",
-    },
-  ];
+  const questions = queryClient.getQueryData(["room-questions", id]) as string[];
 
   const members = queryClient.getQueryData(["room-members", id]) as {
     hostId: string;
@@ -155,29 +150,33 @@ const MatchingStateView = () => {
   };
 
   const toggleUserValue = (value: string, idx: number) => {
-    console.log(value, idx);
+    setGuess(idx, value);
+    // io.emit("makeGuess", id, idx, value);
   };
 
   return (
     <div>
       <div className="bg-stone-200 p-4 rounded-xl border-2 border-stone-800 flex flex-col gap-3">
-        {data.map((fact, idx) => (
-          <div className="flex flex-col gap-1">
-            <p className="text-xl font-medium">{fact.question}</p>
-            <p>{fact.answer}</p>
-
+        {data.map((unknownUser, idx) => (
+          <>
+          {[...unknownUser.answers].map(([questionIdx, answer]) => (
+            <div className="flex flex-col gap-1">
+              <p className="text-xl font-medium">{questions[questionIdx]}</p>
+              <p>{answer}</p>
+            </div>))}
             <ToggleGroup
               type="single"
               className="my-2"
+              value={guesses[idx]}
               onValueChange={(value) => toggleUserValue(value, idx)}
             >
-              {members.users.map((user) => (
+              {members.users.filter((user) => user.id !== io.id).map((user) => (
                 <ToggleGroupItem value={user.id} key={user.id}>
                   {user.name}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-          </div>
+          </>
         ))}
       </div>
     </div>
@@ -187,17 +186,17 @@ const MatchingStateView = () => {
 const GameState = () => {
   const gameState = useGameStore((s) => s.state);
 
-  return <MatchingStateView />;
+  // return <MatchingStateView />;
 
-  // if (gameState === "answering") {
-  //   return <AnsweringStateView />;
-  // }
+  if (gameState === "answering") {
+    return <AnsweringStateView />;
+  }
 
-  // if (gameState === "matching") {
-  //   return <MatchingStateView />;
-  // }
+  if (gameState === "matching") {
+    return <MatchingStateView />;
+  }
 
-  // return <div></div>;
+  return <div></div>;
 };
 
 export const RoomPlayView = () => {
@@ -260,7 +259,9 @@ export const RoomPlayView = () => {
           {state === "finished" ? "Game Over" : `Round: ${round + 1}`}
         </p>
       </nav>
-      <GameState />
+      <Suspense>
+        <GameState />
+      </Suspense>
     </main>
   );
 };
