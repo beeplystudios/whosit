@@ -253,10 +253,12 @@ export const RoomView = () => {
             <p className="font-medium font-mono text-2xl">Join Code: {id}</p>
           </div>
 
-          <Button onClick={startGame} className="gap-2 my-4">
-            <PlayIcon className="h-4 w-4" />
-            Start Game
-          </Button>
+          {data.hostId === io.id && (
+            <Button onClick={startGame} className="gap-2 my-4">
+              <PlayIcon className="h-4 w-4" />
+              Start Game
+            </Button>
+          )}
         </div>
         <div className="flex gap-8 flex-col-reverse">
           <div className="flex-1">
