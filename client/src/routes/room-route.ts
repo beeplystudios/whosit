@@ -24,6 +24,7 @@ export const roomRoute = createRoute({
   loader: async ({ context, params }) => {
     await context.queryClient.ensureQueryData(memberListQuery(params.id));
   },
+  wrapInSuspense: true,
   component: RoomView,
 });
 

@@ -193,6 +193,7 @@ const QuestionEditor: React.FC<{ isHost: boolean }> = (props) => {
 export const RoomView = () => {
   const { id } = roomRoute.useParams();
   const { data, refetch } = useSuspenseQuery(memberListQuery(id));
+  const { data: questions } = useSuspenseQuery(questionListQuery(id));
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -260,7 +261,7 @@ export const RoomView = () => {
             <Button
               onClick={startGame}
               className="gap-2 my-4"
-              disabled={data.users.length <= 1}
+              disabled={data.users.length <= 1 || questions.length === 0 }
             >
               <PlayIcon className="h-4 w-4" />
               Start Game

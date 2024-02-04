@@ -30,7 +30,8 @@ export const addUser = (id: string, userData: { id: string, name: string }) => {
   }
 
   if (room.started) {
-    throw new Error(`Room with ${id} is not accepting new users`);
+    // throw new Error(`Room with ${id} is not accepting new users`);
+    return;
   }
 
   const user = { ...userData, points: 0, answers: new Map(), guesses: new Map() };
