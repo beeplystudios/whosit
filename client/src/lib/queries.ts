@@ -16,3 +16,13 @@ export const memberListQuery = (id: string) =>
       }),
     refetchOnWindowFocus: false,
   });
+
+export const questionListQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["room-questions", id],
+    queryFn: async () =>
+      await request({
+        route: `/room/${id}/questions`,
+        schema: z.array(z.string()),
+      }),
+  });

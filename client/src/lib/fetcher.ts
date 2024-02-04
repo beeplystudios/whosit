@@ -3,18 +3,21 @@ import SuperJSON from "superjson";
 
 const SERVER_URL = "http://localhost:3000";
 
-type RequestOptions<T> = {
-  route: string;
-  schema: T;
-  options?: RequestInit;
-  method?: "GET";
-} | {
-  route: string;
-  schema: T;
-  options?: RequestInit;
-  body?: any;
-  method?: "POST";
-};
+type RequestOptions<T> =
+  | {
+      route: string;
+      schema: T;
+      options?: RequestInit;
+      method?: "GET";
+    }
+  | {
+      route: string;
+      schema: T;
+      options?: RequestInit;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      body?: any;
+      method?: "POST";
+    };
 
 export const request = async <T extends z.ZodType>(
   opts: RequestOptions<T>
