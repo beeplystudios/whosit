@@ -247,7 +247,7 @@ export const RoomView = () => {
 
   return (
     <main className="h-screen flex items-center">
-      <div className="flex flex-col gap-8 my-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
+      <div className="flex flex-col gap-8 my-8 w-[95%] mx-auto md:w-3/4 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
         <div className="flex item-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl lg:text-3xl font-semibold font-whosit">
