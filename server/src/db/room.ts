@@ -132,4 +132,5 @@ export const nextRound = (roomId: string) => {
   }
   
   room.round += 1;
+  return room.round;
 }

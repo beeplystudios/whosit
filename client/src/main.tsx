@@ -4,10 +4,10 @@ import ReactDOM from "react-dom/client";
 import { rootRoute } from "./routes/__root.tsx";
 import { indexRoute } from "./routes/index.tsx";
 import "./global.css";
-import { roomRoute } from "./routes/room-route.ts";
+import { roomPlayRoute, roomRoute } from "./routes/room-route.ts";
 import { queryClient } from "./lib/query-client.tsx";
 
-const routeTree = rootRoute.addChildren([indexRoute, roomRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, roomRoute, roomPlayRoute]);
 
 const router = createRouter({
   routeTree,

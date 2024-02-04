@@ -25,8 +25,6 @@ roomRouter.get("/:roomId/users", (req, res) => {
 roomRouter.get("/:roomId/questions", (req, res) => {
   const { roomId } = req.params;
 
-  console.log("GET questions");
-
   try {
     const questions = getQuestions(roomId);
     res.send(SuperJSON.stringify(questions));
@@ -35,3 +33,15 @@ roomRouter.get("/:roomId/questions", (req, res) => {
     res.send(SuperJSON.stringify({ error: (err as Error).message }));
   }
 })
+
+roomRouter.get("/:roomId/responses", (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    const users = getUsers(roomId);
+    res.send(SuperJSON.stringify(users.map((user) => { return { id: user.id, answers: user.answers }; })));
+  } catch (err) {
+    res.status(404);
+    res.send(SuperJSON.stringify({ error: (err as Error).message }));
+  }
+});

@@ -11,7 +11,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { getRouteApi, useRouter } from "@tanstack/react-router";
+import { getRouteApi, useNavigate, useRouter } from "@tanstack/react-router";
 import React, { Suspense, useCallback, useEffect } from "react";
 import { z } from "zod";
 import { Button } from "./ui/button";
@@ -191,6 +191,7 @@ export const RoomView = () => {
   const { id } = roomRoute.useParams();
   const { data, refetch } = useSuspenseQuery(memberListQuery(id));
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const newUserHandler = useCallback(
     (user: z.infer<typeof userSchema>) => {
@@ -214,10 +215,22 @@ export const RoomView = () => {
     handler: userLeaveHandler,
   });
 
+  useIoEvent({
+    eventName: "gameStarted",
+    handler: () => {
+      navigate({
+        to: "/room/$id/play",
+        params: { id },
+      });
+    },
+  });
+
   const router = useRouter();
   const io = useIo();
 
-  const startGame = () => {};
+  const startGame = () => {
+    io.emit("startGame", id);
+  };
 
   useEffect(() => {
     router.subscribe("onBeforeLoad", (data) => {
