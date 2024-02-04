@@ -179,6 +179,10 @@ export const RoomView = () => {
   const router = useRouter();
   const io = useIo();
 
+  const startGame = () => {
+    
+  };
+
   useEffect(() => {
     router.subscribe("onBeforeLoad", (data) => {
       if (!data.toLocation.pathname.startsWith("/room/")) {
@@ -191,12 +195,18 @@ export const RoomView = () => {
 
   return (
     <main className="h-screen flex items-center">
-      <div className="flex flex-col justify-center gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
-        <div className="text-center flex flex-col gap-2">
-          <h1 className="text-4xl font-semibold font-whosit">
-            Welcome to the Room
-          </h1>
-          <p className="font-medium font-mono text-2xl">Join Code: {id}</p>
+      <div className="flex flex-col gap-8 w-[95%] mx-auto md:w-1/2 bg-orange-500/25 rounded-3xl h-max px-8 py-16 border-4 border-stone-800 shadow-rose-700 shadow-md">
+        <div className="flex flex-col item-center justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl font-semibold font-whosit">
+              Welcome to the Room
+            </h1>
+            <p className="font-medium font-mono text-2xl">Join Code: {id}</p>
+          </div>
+
+          <Button onClick={startGame}>
+            Start Game
+          </Button>
         </div>
         <div className="flex gap-4 flex-col-reverse lg:flex-row">
           <div className="flex-1">
