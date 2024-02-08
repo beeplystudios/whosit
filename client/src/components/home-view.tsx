@@ -228,6 +228,32 @@ export const HomeView = () => {
             <JoinRoom />
           </div>
         )}
+        <footer className="text-center font-medium">
+          <p className="max-w-lg text-sm">
+            Made by{" "}
+            <a href="https://nirjhor.dev" className="underline text-pink-900">
+              Nirjhor Nath
+            </a>
+            ,{" "}
+            <a href="https://aramie.ooo" className="underline text-pink-900">
+              Aramie Ewen
+            </a>
+            , and{" "}
+            <a
+              href="https://github.com/Dash-L"
+              className="underline text-pink-900"
+            >
+              Dashiell Elliott
+            </a>{" "}
+            for HopperHacks 2024. Source code is available on our{" "}
+            <a
+              href="https://github.com/beeplystudios/whosit"
+              className="underline text-pink-900"
+            >
+              GitHub Repo
+            </a>
+          </p>
+        </footer>
       </div>
     </main>
   );
